@@ -22,7 +22,7 @@ export abstract class EntityRepository<T extends Document> {
   }
 
   findOne(
-    entityFilterQuery: FilterQuery<T>,
+    entityFilterQuery?: FilterQuery<T>,
     projection?: Record<string, unknown>,
   ): Promise<T | null> {
     return this.entityModel
@@ -53,12 +53,23 @@ export abstract class EntityRepository<T extends Document> {
     return entity.save();
   }
 
+  async updateOne(
+    entityFilterQuery: FilterQuery<T>,
+    updateEntitydata: UpdateQuery<unknown>,
+    options: QueryOptions<T> = { new: true },
+  ): Promise<T | unknown | null> {
+    return await this.entityModel
+      .updateOne(entityFilterQuery, updateEntitydata, options)
+      .exec();
+  }
+
   findOneAndUpdate(
     entityFilterQuery: FilterQuery<T>,
     updateEntitydata: UpdateQuery<unknown>,
+    options: QueryOptions<T> = { new: true },
   ): Promise<T | null> {
     return this.entityModel
-      .findOneAndUpdate(entityFilterQuery, updateEntitydata, { new: true })
+      .findOneAndUpdate(entityFilterQuery, updateEntitydata, options)
       .exec();
   }
 
