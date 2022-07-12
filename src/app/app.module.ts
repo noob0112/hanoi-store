@@ -9,6 +9,7 @@ import { VouchersModule } from 'src/modules/vouchers/vouchers.module';
 import { UploadModule } from 'src/modules/upload/upload.module';
 import { CategoriesModule } from 'src/modules/categories/categories.module';
 import { FlashSalesModule } from 'src/modules/flash-sales/flash-sales.module';
+import { OrdersModule } from 'src/modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -21,8 +22,9 @@ import { FlashSalesModule } from 'src/modules/flash-sales/flash-sales.module';
     UploadModule,
     CategoriesModule,
     ItemsModule,
-    // VouchersModule,
+    VouchersModule,
     FlashSalesModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],

@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import { isMoreThanDateNow, isMoreThanStartTime } from 'src/common/custom-dtos';
 
@@ -43,7 +44,8 @@ export class NewVoucherDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  quatity: number;
+  @Min(1)
+  quantity: number;
 
   @ApiProperty()
   @IsNotEmpty()

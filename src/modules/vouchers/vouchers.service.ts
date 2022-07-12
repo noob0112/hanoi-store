@@ -6,26 +6,24 @@ import {
 } from '@nestjs/common';
 
 import { VouchersRepository } from './vouchers.repository';
-import { INewVoucher, IVoucher, IUpdateVoucher } from './entities';
+import {
+  INewVoucher,
+  IVoucher,
+  IUpdateVoucher,
+  IQueryVoucher,
+} from './entities';
+import { VOUCHER_OPTIONS_ENUM } from './vouchers.constant';
 
 @Injectable()
 export class VouchersService {
   constructor(readonly vouchersRepository: VouchersRepository) {}
 
   async createVoucher(newVoucher: INewVoucher): Promise<IVoucher> {
-    if (newVoucher.startTime < newVoucher.endTime) {
-      return await this.vouchersRepository
-        .create(newVoucher)
-        .then()
-        .catch((error) => {
-          if (Object.keys(error.keyPattern)[0])
-            throw new BadRequestException('Code of voucher is existed!');
-          throw new InternalServerErrorException(error.message);
-        });
-    }
-    throw new BadRequestException(
-      'Please input startTime smaller than endTime!',
-    );
+    return await this.vouchersRepository.create(newVoucher).catch((error) => {
+      if (Object.keys(error.keyPattern)[0])
+        throw new BadRequestException('Code of voucher is existed!');
+      throw new InternalServerErrorException(error.message);
+    });
   }
 
   async findVoucherById(voucherId: string): Promise<IVoucher> {
@@ -42,8 +40,13 @@ export class VouchersService {
     return voucher;
   }
 
-  async findListVoucher(): Promise<IVoucher[]> {
-    return await this.vouchersRepository.find();
+  findListVoucher(query: IQueryVoucher): Promise<IVoucher[]> {
+    const options = {
+      limit: VOUCHER_OPTIONS_ENUM.LIMIT,
+      skip: VOUCHER_OPTIONS_ENUM.LIMIT * ((query.page - 1) | 0),
+    };
+
+    return this.vouchersRepository.find({}, {}, options);
   }
 
   async findVoucherByIdAndUpdate(
@@ -54,6 +57,16 @@ export class VouchersService {
       voucherId,
       updateVoucher,
     );
+  }
+
+  findVoucherByIdAndUpdateQuatity(voucherId: string): Promise<IVoucher> {
+    return this.vouchersRepository
+      .findByIdAndUpdate(voucherId, {
+        $inc: { quantity: -1 },
+      })
+      .catch((error) => {
+        throw new BadRequestException(error.message);
+      });
   }
 
   async findVoucherByIdAndDelete(voucherId: string): Promise<boolean | void> {

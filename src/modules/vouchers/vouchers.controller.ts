@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ObjectIdDto } from 'src/common/dtos';
@@ -15,7 +16,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { VerifyGuard } from '../auth/guards/verify.guard';
 import { ROLE_ENUM } from '../users/users.constant';
-import { NewVoucherDto, UpdateVoucherDto } from './dtos';
+import { NewVoucherDto, QueryVoucherDto, UpdateVoucherDto } from './dtos';
 import { IVoucher } from './entities';
 import { VouchersService } from './vouchers.service';
 
@@ -23,16 +24,16 @@ import { VouchersService } from './vouchers.service';
 export class VouchersController {
   constructor(readonly vouchersService: VouchersService) {}
 
-  @UseGuards(JwtGuard, VerifyGuard, RolesGuard)
-  @Roles(ROLE_ENUM.USER)
-  @Post('')
+  // @UseGuards(JwtGuard, VerifyGuard, RolesGuard)
+  // @Roles(ROLE_ENUM.ADMIN)
+  @Post()
   async createVoucher(@Body() voucher: NewVoucherDto): Promise<IVoucher> {
     return await this.vouchersService.createVoucher(voucher);
   }
 
-  @Get('')
-  async findListVoucher(): Promise<IVoucher[]> {
-    return await this.vouchersService.findListVoucher();
+  @Get()
+  async findListVoucher(@Query() query: QueryVoucherDto): Promise<IVoucher[]> {
+    return await this.vouchersService.findListVoucher(query);
   }
 
   @Get('/:id')

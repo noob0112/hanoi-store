@@ -4,6 +4,6 @@ export interface INewVoucher {
   description: string;
   startTime: Date;
   endTime: Date;
-  quatity: number;
+  quantity: number;
   discount: number;
 }

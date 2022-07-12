@@ -22,7 +22,7 @@ export class Voucher extends TimestampsMongodb {
   endTime: Date;
 
   @Prop({ required: true })
-  quatity: number;
+  quantity: number;
 
   @Prop({ default: false })
   discount: number;
