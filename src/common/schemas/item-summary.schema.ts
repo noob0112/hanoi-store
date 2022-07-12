@@ -16,9 +16,6 @@ export class ItemSummary {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ default: null })
-  priceBeforeDiscount?: number;
-
   @Prop({ required: true })
   avatarImage: string;
 
