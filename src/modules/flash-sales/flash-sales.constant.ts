@@ -1,0 +1,3 @@
+export enum FLASH_SALES_OPTIONS_ENUM {
+  LIMIT = 10,
+}
