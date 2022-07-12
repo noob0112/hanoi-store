@@ -95,6 +95,13 @@ export class CategoriesService {
     return this.categoriesRepository.findByIdAndAddItem(id, itemSummary);
   }
 
+  updateCategoryItem(categoryId: string, itemSummary: ICategoryItemSummary) {
+    return this.categoriesRepository.updateOne(
+      { _id: categoryId, 'listItems.itemId': itemSummary.itemId },
+      { $set: { 'listItems.$': itemSummary } },
+    );
+  }
+
   async findAndDeleteCategoryById(id: string): Promise<void> {
     const category = await this.categoriesRepository
       .findByIdAndDelete(id)
