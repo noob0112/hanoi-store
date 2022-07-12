@@ -32,6 +32,6 @@ export class ItemsController {
     @Param() param: ObjectIdDto,
     @Body() updateItem: UpdateItemDto,
   ): Promise<IItem> {
-    return this.itemsService.findAndUpdateItemById(param.id, updateItem);
+    return this.itemsService.findItemByIdAndUpdate(param.id, updateItem);
   }
 }

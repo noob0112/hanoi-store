@@ -1,16 +1,3 @@
-import { ICategorySummary } from 'src/common/entities';
-import { FlashSaleSummary } from 'src/common/schemas';
+import { INewItem } from './new-item.entity';
 
-export interface IUpdateItem {
-  name?: string;
-  barCode?: string;
-  cost?: number;
-  price?: number;
-  weight?: number;
-  avataImage?: string;
-  detailImage?: string[];
-  description?: string;
-  flashSale?: FlashSaleSummary;
-  stock?: number;
-  category?: ICategorySummary;
-}
+export type IUpdateItem = Partial<INewItem>;

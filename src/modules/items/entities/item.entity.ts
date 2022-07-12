@@ -1,18 +1,11 @@
-import { ICategorySummary, IFlashSaleSummary } from 'src/common/entities';
+import { IFlashSaleSummary } from 'src/common/entities';
+import { INewItem } from '.';
 
-export interface IItem {
+export interface IItem extends INewItem {
   _id: string;
-  name: string;
-  barCode: string;
-  cost: number;
-  price: number;
-  weight: number;
-  avataImage: string;
-  detailImage: string[];
-  description: string;
   flashSale?: IFlashSaleSummary;
-  stock: number;
   historicalSold: number;
-  category: ICategorySummary;
   countOfSelling: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

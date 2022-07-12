@@ -59,33 +59,7 @@ export class ItemsService {
     );
 
     return listItems.map((item) => {
-      if (!flashSale) {
-        return {
-          ...item['_doc'],
-          flashSale: null,
-        };
-      }
-
-      const flashSaleItem = flashSale.listItems.find((flashSaleItem) => {
-        return String(flashSaleItem.itemId) === String(item._id);
-      });
-
-      if (!flashSaleItem) {
-        return {
-          ...item['_doc'],
-          flashSale: null,
-        };
-      }
-
-      return {
-        ...item['_doc'],
-        flashSale: {
-          flashSaleId: flashSale._id,
-          startTime: flashSale.startTime,
-          endTime: flashSale.endTime,
-          priceBeforeDiscount: flashSaleItem.priceBeforeDiscount,
-        },
-      };
+      return this.checkFlashSale(item, flashSale);
     });
   }
 
@@ -98,10 +72,42 @@ export class ItemsService {
     if (!item) {
       throw new BadRequestException('item is not exist!');
     }
+
+    const filterFlashSale = { isOnGoing: true };
+    const selectFlashSale = {};
+    const flashSale = await this.flashSalesService.findOneFlashSale(
+      filterFlashSale,
+      selectFlashSale,
+    );
+
+    return this.checkFlashSale(item, flashSale);
+  }
+
+  async findItemByIdAndUpdateStock(itemId: string): Promise<IItem> {
+    const item = await this.itemsRepository
+      .findByIdAndUpdate(itemId, {
+        $inc: { stock: -1 },
+      })
+      .catch((error) => {
+        throw new BadRequestException(error.message);
+      });
+
     return item;
   }
 
-  async findAndUpdateItemById(itemId: string, updateItem: IUpdateItem) {
+  async findItemByIdAndUpdate(
+    itemId: string,
+    updateItem: IUpdateItem,
+  ): Promise<IItem> {
+    // IF UPDATE CATEGORY => GET CATEGORY NAME
+    if (updateItem.category.categoryId) {
+      const category = await this.categoriesService.findCategoryById(
+        String(updateItem.category.categoryId),
+      );
+
+      updateItem.category.categoryName = category.name;
+    }
+
     const item = await this.itemsRepository
       .findByIdAndUpdate(itemId, {
         $set: updateItem,
@@ -113,6 +119,11 @@ export class ItemsService {
     if (!item) {
       throw new BadRequestException('item is not exist!');
     }
+
+    await this.categoriesService.updateCategoryItem(
+      String(item.category.categoryId),
+      this.getItemSummary(item),
+    );
 
     return item;
   }
@@ -126,6 +137,36 @@ export class ItemsService {
       price: item.price,
       historicalSold: item.historicalSold,
       stock: item.stock,
+    };
+  }
+
+  checkFlashSale(item, flashSale) {
+    if (!flashSale) {
+      return {
+        ...item['_doc'],
+        flashSale: null,
+      };
+    }
+
+    const flashSaleItem = flashSale.listItems.find((flashSaleItem) => {
+      return String(flashSaleItem.itemId) === String(item._id);
+    });
+
+    if (!flashSaleItem) {
+      return {
+        ...item['_doc'],
+        flashSale: null,
+      };
+    }
+
+    return {
+      ...item['_doc'],
+      flashSale: {
+        flashSaleId: flashSale._id,
+        startTime: flashSale.startTime,
+        endTime: flashSale.endTime,
+        priceBeforeDiscount: flashSaleItem.priceBeforeDiscount,
+      },
     };
   }
 }

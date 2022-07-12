@@ -34,7 +34,7 @@ export class Item extends TimestampsMongodb {
   @Prop()
   description: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, min: 0 })
   stock: number;
 
   @Prop({ default: 0 })
