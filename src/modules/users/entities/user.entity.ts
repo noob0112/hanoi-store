@@ -1,4 +1,4 @@
-import { ROLE_ENUM, STATUS_ENUM } from '../users.constant';
+import { ROLE_ENUM, USER_STATUS_ENUM } from '../users.constant';
 import { INewUser } from './new-user.entity';
 
 export interface IUser extends INewUser {
@@ -6,5 +6,5 @@ export interface IUser extends INewUser {
 
   role: ROLE_ENUM;
 
-  status: STATUS_ENUM;
+  status: USER_STATUS_ENUM;
 }

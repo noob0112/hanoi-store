@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { IUser, INewUser } from './entities';
-import { STATUS_ENUM } from './users.constant';
+import { USER_STATUS_ENUM } from './users.constant';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -37,10 +37,14 @@ export class UsersService {
 
   async findByIdAndUpdateStatus(
     id: string,
-    status: STATUS_ENUM,
+    status: USER_STATUS_ENUM,
   ): Promise<IUser> {
     return await this.usersRepository.findByIdAndUpdate(id, {
       $set: { status },
     });
+  }
+
+  findUserById(id: string): Promise<IUser> {
+    return this.usersRepository.findById(id);
   }
 }

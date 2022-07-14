@@ -3,7 +3,7 @@ export enum ROLE_ENUM {
   ADMIN = 'ADMIN',
 }
 
-export enum STATUS_ENUM {
+export enum USER_STATUS_ENUM {
   PENDING = 'PENDING',
   ACTION = 'ACTION',
 }

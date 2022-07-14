@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { TimestampsMongodb } from 'src/common/schemas/time-stamps.schema';
-import { ROLE_ENUM, STATUS_ENUM } from '../users.constant';
+import { ROLE_ENUM, USER_STATUS_ENUM } from '../users.constant';
 
 export type UserDocument = User & Document;
 
@@ -28,8 +28,8 @@ export class User extends TimestampsMongodb {
   @Prop({ enum: ROLE_ENUM, default: ROLE_ENUM.USER })
   role: ROLE_ENUM;
 
-  @Prop({ enum: STATUS_ENUM, default: STATUS_ENUM.PENDING })
-  status: STATUS_ENUM;
+  @Prop({ enum: USER_STATUS_ENUM, default: USER_STATUS_ENUM.PENDING })
+  status: USER_STATUS_ENUM;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
