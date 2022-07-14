@@ -18,7 +18,6 @@ import {
   mockUserTokenPending,
 } from './auth.mock';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { ISignUp } from './entities';
 
 describe('AuthService', () => {
   let service: AuthService;
