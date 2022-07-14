@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Types } from 'mongoose';
 import { objectId } from '../types';
 
 @Schema({ _id: false })
 export class FlashSaleSummary {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'FlashSale' })
+  @Prop({ type: Types.ObjectId, ref: 'FlashSale' })
   flashSaleId: objectId;
 
   @Prop({ required: true })
@@ -12,6 +12,9 @@ export class FlashSaleSummary {
 
   @Prop({ required: true })
   endTime: Date;
+
+  @Prop({ required: true })
+  priceBeforeDiscount: number;
 }
 
 export const FlashSaleSummarySchema =

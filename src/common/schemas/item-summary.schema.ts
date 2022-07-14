@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { objectId } from 'src/common/types';
-import * as mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({ _id: false })
 export class ItemSummary {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
+  @Prop({ type: Types.ObjectId, ref: 'Item' })
   itemId: objectId;
 
   @Prop({ required: true })
