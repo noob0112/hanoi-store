@@ -18,7 +18,7 @@ export class CategoriesService {
 
   createCategory(newCategory: INewCategory): Promise<ICategory> {
     return this.categoriesRepository.create(newCategory).catch((error) => {
-      if (Object.keys(error.keyPattern)[0] === 'name')
+      if (error.keyPattern && Object.keys(error.keyPattern)[0] === 'name')
         throw new BadRequestException('Category name is existed!');
       throw new BadRequestException(error.message);
     });
@@ -39,9 +39,7 @@ export class CategoriesService {
   }
 
   async findCategoryById(id: string): Promise<ICategory> {
-    const select = {
-      listItems: 0,
-    };
+    const select = {};
     const category = await this.categoriesRepository
       .findById(id, select)
       .catch((error) => {
@@ -99,6 +97,7 @@ export class CategoriesService {
     return this.categoriesRepository.updateOne(
       { _id: categoryId, 'listItems.itemId': itemSummary.itemId },
       { $set: { 'listItems.$': itemSummary } },
+      { fields: { 'listItems.$': 1 }, new: true },
     );
   }
 

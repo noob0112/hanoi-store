@@ -7,6 +7,14 @@ import {
   IUpdateCategory,
 } from './entities';
 
+export const mockError = {
+  message: 'error message',
+  // index: 0,
+  // code: 11000,
+  // keyPattern: { name: 1 },
+  // keyValue: { name: 'smart-phone' },
+};
+
 export const mockCategoryId = 'test';
 
 export const mockCategory: ICategory = {
@@ -30,7 +38,15 @@ export const mockCategory: ICategory = {
 
 export let mockCategoryStatus: StatusCategoryDto;
 
-export let mockCategoryItemSummary: ICategoryItemSummary;
+export const mockCategoryItemSummary: ICategoryItemSummary = {
+  itemId: '',
+  itemName: '',
+  barCode: '',
+  price: 0,
+  avatarImage: '',
+  stock: 0,
+  historicalSold: 0,
+};
 
 export let mockUpdateCategory: IUpdateCategory;
 
