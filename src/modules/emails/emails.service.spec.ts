@@ -26,7 +26,7 @@ describe('MailService', () => {
   });
 
   describe('sendUserConfirmation', () => {
-    it('should send email for user', async () => {
+    it('[Expect-Success] should send email for user', async () => {
       const user: IMailUser = {
         email: 'test@email.com',
         fullName: 'test',
