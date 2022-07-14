@@ -27,10 +27,7 @@ export class FlashSalesController {
 
   @Get(':id')
   findFlashSaleById(@Param() param: ObjectIdDto): Promise<IFlashSale> {
-    const select = {
-      listItems: 0,
-    };
-    return this.flashSalesService.findFlashSaleById(param.id, select);
+    return this.flashSalesService.findFlashSaleById(param.id);
   }
 
   @Get(':id/detail')

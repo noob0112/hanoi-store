@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,10 +10,16 @@ import { NewFlashSaleDto } from './dtos/new-flash-sale.dto';
 import { FlashSalesRepository } from './flash-sales.repository';
 import { IFlashSale, IFlashSaleAddItem } from './entities';
 import { FLASH_SALES_OPTIONS_ENUM } from './flash-sales.constant';
+import { ItemsService } from '../items/items.service';
+import { IItem } from '../items/entities';
 
 @Injectable()
 export class FlashSalesService {
-  constructor(readonly flashSalesRepository: FlashSalesRepository) {}
+  constructor(
+    readonly flashSalesRepository: FlashSalesRepository,
+    @Inject(forwardRef(() => ItemsService))
+    readonly itemsService: ItemsService,
+  ) {}
 
   async creatFlashSale(newFlashSale: NewFlashSaleDto): Promise<IFlashSale> {
     return await this.flashSalesRepository
@@ -23,9 +31,7 @@ export class FlashSalesService {
 
   async findAllFlashSales(): Promise<IFlashSale[]> {
     const filter = {};
-    const select = {
-      listItems: 0,
-    };
+    const select = {};
     const options = {
       limit: FLASH_SALES_OPTIONS_ENUM.LIMIT,
     };
@@ -68,10 +74,39 @@ export class FlashSalesService {
 
   async addItemToFlashSale(
     flashSaleId: string,
-    newItemFlashSaleDto: IFlashSaleAddItem,
+    newFlashSaleItem: IFlashSaleAddItem,
   ): Promise<IFlashSale> {
-    return this.updateFlashSaleById(flashSaleId, {
-      listItems: newItemFlashSaleDto,
+    const itemIsExisted = await this.flashSalesRepository.findOne({
+      _id: flashSaleId,
+      'listItems.itemId': newFlashSaleItem.itemId,
     });
+
+    if (itemIsExisted) {
+      throw new BadRequestException('Item is existed in flash sale!');
+    }
+
+    const item = await this.itemsService.findItemById(newFlashSaleItem.itemId);
+    return this.flashSalesRepository.findByIdAndUpdate(flashSaleId, {
+      $push: {
+        listItems: this.getFlashSaleItem(
+          item,
+          newFlashSaleItem.priceBeforeDiscount,
+        ),
+      },
+    });
+  }
+
+  getFlashSaleItem(item: IItem, priceBeforeDiscount: number) {
+    return {
+      itemId: item._id,
+      itemName: item.name,
+      barCode: item.barCode,
+      price: item.price,
+      priceBeforeDiscount,
+      avataImage: item.avataImage,
+      stock: item.stock,
+      historicalSold: item.historicalSold,
+      category: item.category,
+    };
   }
 }
