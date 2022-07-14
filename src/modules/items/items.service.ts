@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ export class ItemsService {
   constructor(
     readonly itemsRepository: ItemsRepository,
     readonly categoriesService: CategoriesService,
+    @Inject(forwardRef(() => FlashSalesService))
     readonly flashSalesService: FlashSalesService,
   ) {}
 
@@ -83,16 +86,27 @@ export class ItemsService {
     return this.checkFlashSale(item, flashSale);
   }
 
-  async findItemByIdAndUpdateStock(itemId: string): Promise<IItem> {
+  // Minus stoke and plus countOfSelling
+  async findItemByIdAndUpdateStock(
+    itemId: string,
+    quantity: number,
+  ): Promise<IItem> {
     const item = await this.itemsRepository
       .findByIdAndUpdate(itemId, {
-        $inc: { stock: -1 },
+        $inc: { stock: -1 * quantity, countOfSelling: 1 },
       })
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
 
-    return item;
+    const filterFlashSale = { isOnGoing: true };
+    const selectFlashSale = {};
+    const flashSale = await this.flashSalesService.findOneFlashSale(
+      filterFlashSale,
+      selectFlashSale,
+    );
+
+    return this.checkFlashSale(item, flashSale);
   }
 
   async findItemByIdAndUpdate(

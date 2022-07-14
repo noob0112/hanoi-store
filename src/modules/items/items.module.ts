@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CategoriesModule } from '../categories/categories.module';
 import { FlashSalesModule } from '../flash-sales/flash-sales.module';
@@ -17,7 +17,7 @@ import { ItemSchema } from './schema/item.schema';
       },
     ]),
     CategoriesModule,
-    FlashSalesModule,
+    forwardRef(() => FlashSalesModule),
   ],
   controllers: [ItemsController],
   providers: [ItemsService, ItemsRepository],
