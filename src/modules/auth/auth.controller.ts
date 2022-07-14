@@ -49,10 +49,10 @@ export class AuthController {
   @Post('/login')
   async login(
     @Body() user: LoginDto,
-    @Res({ passthrough: true }) res: Response,
+    // @Res({ passthrough: true }) res: Response,
   ): Promise<ILogin> {
     const data = await this.authService.login(user.userName, user.password);
-    res.cookie('accessToken', data.accessToken, { httpOnly: true });
+    // res.cookie('accessToken', data.accessToken, { httpOnly: true });
     return data;
   }
 
@@ -65,7 +65,7 @@ export class AuthController {
     description: 'The user do not verify email',
   })
   @Get('/confirm')
-  async confirmEmail(@Query() query: TokenDto): Promise<boolean> {
+  async confirmEmail(@Query() query: TokenDto): Promise<void | boolean> {
     return await this.authService.confirmEmail(query.token);
   }
 }

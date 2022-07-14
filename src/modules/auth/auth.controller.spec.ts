@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthController } from './auth.controller';
-import { mockSignUp, mockSignUpResponse } from './auth.mock';
+import { mockPass, mockSignUp, mockUserName } from './auth.mock';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
@@ -10,6 +10,7 @@ describe('AuthController', () => {
   const mockAuthService = {
     signUp: jest.fn(),
     login: jest.fn(),
+    confirmEmail: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -29,11 +30,9 @@ describe('AuthController', () => {
   });
 
   describe('signUp', () => {
-    it('should create a new user and return true', async () => {
+    it('[Expect-Success] should create a new user and return true', async () => {
       mockAuthService.signUp.mockResolvedValue(true);
-
       const result = await controller.signUp(mockSignUp);
-
       expect(result).toBe(true);
     });
   });
@@ -41,9 +40,19 @@ describe('AuthController', () => {
   describe('Login', () => {
     it('[Expect-Success] should return true', async () => {
       mockAuthService.login.mockResolvedValue(true);
+      const result = await controller.login({
+        userName: mockUserName,
+        password: mockPass,
+      });
+      expect(result).toBe(true);
+    });
+  });
 
-      const result = await controller.signUp(mockSignUp);
-
+  describe('confirmEmail', () => {
+    it('[Expect-Success] should return true', async () => {
+      const query = { token: 'token' };
+      mockAuthService.confirmEmail.mockResolvedValue(true);
+      const result = await controller.confirmEmail(query);
       expect(result).toBe(true);
     });
   });

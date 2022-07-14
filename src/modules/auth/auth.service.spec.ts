@@ -6,10 +6,19 @@ import { AES } from 'crypto-js';
 import { AuthService } from './auth.service';
 import { MailService } from '../emails/emails.service';
 import { UsersService } from '../users/users.service';
-import { mockSignUp, mockSignUpResponse } from './auth.mock';
-import { ILogin } from './entities';
-import { IUser } from '../users/entities';
-import { ROLE_ENUM, STATUS_ENUM } from '../users/users.constant';
+import {
+  mockLoginReturn,
+  mockPass,
+  mockSignUp,
+  mockSignUpResponse,
+  mockToken,
+  mockUser,
+  mockUserName,
+  mockUserPending,
+  mockUserTokenPending,
+} from './auth.mock';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { ISignUp } from './entities';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -17,6 +26,7 @@ describe('AuthService', () => {
   const mockUsersService = {
     create: jest.fn(),
     findOneByUserName: jest.fn(),
+    findByIdAndUpdateStatus: jest.fn(),
   };
 
   const mockMailService = {
@@ -25,6 +35,7 @@ describe('AuthService', () => {
 
   const mockJwtService = {
     sign: jest.fn(),
+    verify: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -60,6 +71,7 @@ describe('AuthService', () => {
       AES.encrypt = jest.fn().mockResolvedValue('secret');
 
       mockUsersService.create.mockResolvedValue(mockSignUpResponse);
+      mockMailService.sendUserConfirmation.mockResolvedValue(true);
 
       const result = await service.signUp(mockSignUp);
 
@@ -69,42 +81,77 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('[Expect-Success] should return accessToken and information user', async () => {
-      const userName = 'test';
-      const pass = 'test';
+      AES.decrypt = jest.fn().mockReturnValue(mockPass);
+      AES.decrypt.toString = jest.fn().mockReturnValue(mockPass);
 
-      const user: IUser = {
-        _id: '1',
-        userName: 'test',
-        fullName: 'test',
-        email: 'test',
-        phoneNumber: 'test',
-        password: 'test',
-        address: 'test',
-        role: ROLE_ENUM.USER,
-        status: STATUS_ENUM.PENDING,
-      };
+      mockUsersService.findOneByUserName.mockResolvedValue(mockUser);
+      mockJwtService.sign.mockReturnValue('accessToken');
+      mockMailService.sendUserConfirmation.mockResolvedValue(true);
 
-      const loginReturn: ILogin = {
-        accessToken: 'accessToken',
-        user: {
-          _id: '1',
-          fullName: 'test',
-          email: 'test',
-          address: 'test',
-        },
-      };
+      const result = await service.login(mockUserName, mockPass);
 
-      AES.decrypt = jest.fn().mockReturnValue('test');
+      expect(result).toEqual(mockLoginReturn);
+    });
 
-      AES.decrypt.toString = jest.fn().mockReturnValue('test');
+    it('[Expect-Fails] UserName is incorecct', async () => {
+      const userIncorecct = 'userIncorecct';
 
-      mockUsersService.findOneByUserName.mockResolvedValue(user);
+      AES.decrypt = jest.fn().mockReturnValue(mockPass);
+      AES.decrypt.toString = jest.fn().mockReturnValue(mockPass);
 
+      mockUsersService.findOneByUserName.mockResolvedValue(undefined);
       mockJwtService.sign.mockReturnValue('accessToken');
 
-      const result = await service.login(userName, pass);
+      const result = service.login(userIncorecct, mockPass);
 
-      expect(result).toEqual(loginReturn);
+      await expect(result).rejects.toEqual(
+        new BadRequestException('userName or password is not correct!'),
+      );
+    });
+
+    it('[Expect-Fails] Password is incorecct', async () => {
+      const passIncorecct = 'passIncorecct';
+
+      AES.decrypt = jest.fn().mockReturnValue(mockPass);
+      AES.decrypt.toString = jest.fn().mockReturnValue(mockPass);
+
+      mockUsersService.findOneByUserName.mockResolvedValue(mockUser);
+      mockJwtService.sign.mockReturnValue('accessToken');
+
+      const result = service.login(mockUserName, passIncorecct);
+
+      await expect(result).rejects.toEqual(
+        new BadRequestException('userName or password is not correct!'),
+      );
+    });
+
+    it('[Expect-Fails] Not validate email', async () => {
+      AES.decrypt = jest.fn().mockReturnValue(mockPass);
+      AES.decrypt.toString = jest.fn().mockReturnValue(mockPass);
+
+      mockUsersService.findOneByUserName.mockResolvedValue(mockUserPending);
+      mockJwtService.sign.mockReturnValue('accessToken');
+
+      const result = service.login(mockUserName, mockPass);
+
+      await expect(result).rejects.toEqual(
+        new UnauthorizedException(
+          'You are not validate email. We are send you a email, please validate in 30 minute',
+        ),
+      );
+    });
+  });
+
+  describe('confirmEmail', () => {
+    it('[Expect-Success] send a mail', async () => {
+      mockJwtService.verify.mockReturnValue(mockUserTokenPending);
+      mockUsersService.findByIdAndUpdateStatus.mockResolvedValue(
+        mockUserPending,
+      );
+
+      const result = await service.confirmEmail(mockToken);
+
+      expect(result).toEqual(true);
     });
   });
 });

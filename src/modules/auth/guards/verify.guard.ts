@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { STATUS_ENUM } from 'src/modules/users/users.constant';
+import { USER_STATUS_ENUM } from 'src/modules/users/users.constant';
 
 @Injectable()
 export class VerifyGuard implements CanActivate {
@@ -8,7 +8,7 @@ export class VerifyGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const { user } = context.switchToHttp().getRequest();
-    if (user.status === STATUS_ENUM.ACTION) return true;
+    if (user.status === USER_STATUS_ENUM.ACTION) return true;
     return false;
   }
 }

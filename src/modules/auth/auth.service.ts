@@ -1,8 +1,7 @@
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AES, enc } from 'crypto-js';
 import { JwtService } from '@nestjs/jwt';
@@ -10,8 +9,9 @@ import { SignOptions } from 'jsonwebtoken';
 
 import { MailService } from '../emails/emails.service';
 import { ILogin, ISignUp, ITokenPayload } from './entities';
-import { STATUS_ENUM } from '../users/users.constant';
+import { USER_STATUS_ENUM } from '../users/users.constant';
 import { UsersService } from '../users/users.service';
+import { IUser } from '../users/entities';
 
 @Injectable()
 export class AuthService {
@@ -30,12 +30,7 @@ export class AuthService {
 
     const user = await this.usersService.create(newUser);
 
-    const payload: ITokenPayload = {
-      _id: user._id,
-      email: user.email,
-      status: user.status,
-      role: user.role,
-    };
+    const payload = this.getPayloadToken(user);
 
     this.mailService.sendUserConfirmation(
       {
@@ -53,10 +48,7 @@ export class AuthService {
     const userFind = await this.usersService.findOneByUserName(userName);
 
     if (!userFind) {
-      throw new HttpException(
-        'email or password is not correct!',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('userName or password is not correct!');
     }
 
     const hashedPassord = AES.decrypt(
@@ -67,20 +59,26 @@ export class AuthService {
     const originalPassword = hashedPassord.toString(enc.Utf8);
 
     if (originalPassword !== pass) {
-      throw new HttpException(
-        'email or password is not correct!',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('userName or password is not correct!');
     }
 
-    const payload: ITokenPayload = {
-      _id: userFind._id,
-      email: userFind.email,
-      status: userFind.status,
-      role: userFind.role,
-    };
+    const payload = this.getPayloadToken(userFind);
 
     const accessToken = this.generateToken(payload);
+
+    if (userFind.status === USER_STATUS_ENUM.PENDING) {
+      this.mailService.sendUserConfirmation(
+        {
+          email: 'hoang011220@gmail.com',
+          fullName: 'Hoang Nguyen',
+        },
+        accessToken,
+      );
+
+      throw new UnauthorizedException(
+        'You are not validate email. We are send you a email, please validate in 30 minute',
+      );
+    }
 
     return {
       accessToken,
@@ -93,22 +91,27 @@ export class AuthService {
     };
   }
 
-  async confirmEmail(token: string): Promise<boolean> {
-    try {
-      const user = this.jwtService.verify(token);
-      if (user.status === STATUS_ENUM.PENDING) {
-        await this.usersService.findByIdAndUpdateStatus(
-          user._id,
-          STATUS_ENUM.ACTION,
-        );
-      }
-      return true;
-    } catch (error) {
-      throw new BadRequestException(error.message);
+  async confirmEmail(token: string): Promise<void | boolean> {
+    const user = this.jwtService.verify(token);
+    if (user.status === USER_STATUS_ENUM.PENDING) {
+      await this.usersService.findByIdAndUpdateStatus(
+        user._id,
+        USER_STATUS_ENUM.ACTION,
+      );
     }
+    return true;
   }
 
   private generateToken(data: ITokenPayload, options?: SignOptions): string {
     return this.jwtService.sign(data, options);
+  }
+
+  private getPayloadToken(user: IUser): ITokenPayload {
+    return {
+      _id: user._id,
+      email: user.email,
+      status: user.status,
+      role: user.role,
+    };
   }
 }
