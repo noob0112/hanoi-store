@@ -4,11 +4,27 @@ import {
   CategorySummarySchema,
   FlashSaleSummary,
   FlashSaleSummarySchema,
-  ItemSummary,
 } from 'src/common/schemas';
+import * as mongoose from 'mongoose';
+import { objectId } from 'src/common/types';
 
 @Schema({ _id: false })
-export class OrderItemSummary extends ItemSummary {
+export class OrderItemSummary {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
+  itemId: objectId;
+
+  @Prop({ required: true })
+  itemName: string;
+
+  @Prop({ required: true })
+  barCode: string;
+
+  @Prop({ required: true })
+  price: number;
+
+  @Prop({ required: true })
+  avatarImage: string;
+
   @Prop({ type: FlashSaleSummarySchema })
   flashSale: FlashSaleSummary;
 

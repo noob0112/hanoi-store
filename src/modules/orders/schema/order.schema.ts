@@ -3,10 +3,8 @@ import { Document } from 'mongoose';
 
 import { TimestampsMongodb } from 'src/common/schemas';
 import { ORDER_STATUS_ENUM } from '../orders.constant';
-import {
-  OrderItemSummary,
-  OrderItemSummarySchema,
-} from './order-item-summary.schema';
+
+import { OrderItem, OrderItemSchema } from './order-item.schema';
 import {
   OrderUserSummary,
   OrderUserSummarySchema,
@@ -23,19 +21,19 @@ export class Order extends TimestampsMongodb {
   @Prop({ required: true, type: OrderUserSummarySchema })
   user: OrderUserSummary;
 
-  @Prop({ require: true, type: [OrderItemSummarySchema] })
-  listItems: OrderItemSummary[];
+  @Prop({ require: true, type: [OrderItemSchema] })
+  listItems: OrderItem[];
 
-  @Prop({ type: [OrderVoucherSummarySchema] })
+  @Prop({ default: null, type: [OrderVoucherSummarySchema] })
   voucher: OrderVoucherSummary;
 
   @Prop({ required: true })
-  orginPrice: number;
+  originPrice: number;
 
   @Prop({ required: true })
   totalPrice: number;
 
-  @Prop({ enum: ORDER_STATUS_ENUM, default: ORDER_STATUS_ENUM.CREATED })
+  @Prop({ enum: ORDER_STATUS_ENUM, default: ORDER_STATUS_ENUM.CONFIRMED })
   status: ORDER_STATUS_ENUM;
 }
 

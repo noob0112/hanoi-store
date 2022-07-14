@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsMongoId,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional } from 'class-validator';
 import { OrderItemDto } from './order-item.dto';
+import { OrderVoucherDto } from './order-voucher.dto';
 
 export class NewOrderDto {
   @ApiProperty()
@@ -16,7 +11,5 @@ export class NewOrderDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsMongoId()
-  @IsString()
-  voucherId: string;
+  voucher: OrderVoucherDto;
 }

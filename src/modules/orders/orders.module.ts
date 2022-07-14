@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CategoriesModule } from '../categories/categories.module';
 import { FlashSalesModule } from '../flash-sales/flash-sales.module';
 import { ItemsModule } from '../items/items.module';
+import { UsersModule } from '../users/users.module';
 import { VouchersModule } from '../vouchers/vouchers.module';
 
 import { OrdersController } from './orders.controller';
@@ -18,6 +19,7 @@ import { OrderSchema } from './schema/order.schema';
         schema: OrderSchema,
       },
     ]),
+    UsersModule,
     ItemsModule,
     VouchersModule,
     CategoriesModule,
