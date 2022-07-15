@@ -50,7 +50,7 @@ describe('CategoriesController', () => {
     it('[Expect-Success] should return list categories', async () => {
       mockCategorysService.findAllCategories.mockResolvedValue([mockCategory]);
 
-      const result = await controller.findAllCategories();
+      const result = await controller.findListCategories();
 
       expect(result).toEqual([mockCategory]);
     });

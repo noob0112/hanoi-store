@@ -26,8 +26,8 @@ export class CategoriesController {
 
   // FIND ALL CATEGORY
   @Get()
-  findAllCategories(): Promise<ICategory[]> {
-    return this.categoriesService.findAllCategories();
+  findListCategories(): Promise<ICategory[]> {
+    return this.categoriesService.findListCategories();
   }
 
   // FIND A CATEGORY

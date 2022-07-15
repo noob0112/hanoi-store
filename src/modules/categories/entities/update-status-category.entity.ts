@@ -1,5 +1,5 @@
 import { STATUS_CATEGORY_ENUM } from '../categories.constant';
 
-export interface IStatusCategory {
+export interface IUpdateCategoryStatus {
   status: STATUS_CATEGORY_ENUM;
 }

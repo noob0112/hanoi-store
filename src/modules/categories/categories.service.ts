@@ -38,6 +38,20 @@ export class CategoriesService {
       });
   }
 
+  findListCategories(): Promise<ICategory[]> {
+    const select = { listItems: 0 };
+    const options = {
+      sort: {
+        field: 1,
+      },
+    };
+    return this.categoriesRepository
+      .find({}, select, options)
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
+  }
+
   async findCategoryById(id: string): Promise<ICategory> {
     const select = {};
     const category = await this.categoriesRepository
@@ -105,6 +119,7 @@ export class CategoriesService {
     const category = await this.categoriesRepository
       .findByIdAndDelete(id)
       .catch((error) => {
+        console.log(error);
         throw new InternalServerErrorException(error.message);
       });
 

@@ -5,11 +5,6 @@ export class UpdateCategoryDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  name?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
   banner?: string;
 
   @ApiProperty()
