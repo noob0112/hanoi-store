@@ -115,17 +115,26 @@ export class CategoriesService {
     );
   }
 
-  async findAndDeleteCategoryById(id: string): Promise<void> {
-    const category = await this.categoriesRepository
-      .findByIdAndDelete(id)
+  async findAndDeleteCategoryById(categoryId: string): Promise<void> {
+    const categoryFind = await this.categoriesRepository.findById(categoryId);
+
+    if (!categoryFind) {
+      throw new NotFoundException('Category Id is incorrect or not exist!');
+    }
+
+    if (categoryFind.listItems.length !== 0) {
+      throw new BadRequestException(
+        'You can not delete category when has item',
+      );
+    }
+
+    await this.categoriesRepository
+      .findByIdAndDelete(categoryId)
       .catch((error) => {
         console.log(error);
         throw new InternalServerErrorException(error.message);
       });
 
-    if (!category) {
-      throw new NotFoundException('Category Id is incorrect or not exist!');
-    }
     return;
   }
 }

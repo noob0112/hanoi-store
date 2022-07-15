@@ -12,4 +12,9 @@ export class FlashSaleAddItemDto {
   @IsNotEmpty()
   @IsNumber()
   priceBeforeDiscount: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  stockFlashSale: number;
 }

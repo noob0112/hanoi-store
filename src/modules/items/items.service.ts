@@ -4,9 +4,12 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
+
 import { CategoriesService } from '../categories/categories.service';
 import { ICategoryItemSummary } from '../categories/entities';
+import { IFlashSale } from '../flash-sales/entities';
 import { FlashSalesService } from '../flash-sales/flash-sales.service';
 
 import { IItem, INewItem, IQueryItem, IUpdateItem } from './entities';
@@ -91,6 +94,14 @@ export class ItemsService {
     itemId: string,
     quantity: number,
   ): Promise<IItem> {
+    // Check stock
+    const itemFind = await this.itemsRepository.findById(itemId);
+    if (itemFind.stock < quantity) {
+      throw new BadRequestException(
+        `Not buy quantity than (${itemFind.stock})`,
+      );
+    }
+
     const item = await this.itemsRepository
       .findByIdAndUpdate(itemId, {
         $inc: { stock: -1 * quantity, countOfSelling: 1 },
@@ -99,6 +110,10 @@ export class ItemsService {
         throw new BadRequestException(error.message);
       });
 
+    if (!item) {
+      throw new NotFoundException('Item does not exist!');
+    }
+
     const filterFlashSale = { isOnGoing: true };
     const selectFlashSale = {};
     const flashSale = await this.flashSalesService.findOneFlashSale(
@@ -106,7 +121,40 @@ export class ItemsService {
       selectFlashSale,
     );
 
-    return this.checkFlashSale(item, flashSale);
+    const itemFlashSale = this.checkFlashSale(item, flashSale);
+
+    if (
+      itemFlashSale.flashSale &&
+      itemFlashSale.flashSale.stockFlashSale !== 0 &&
+      itemFlashSale.flashSale.stockFlashSale >= quantity
+    ) {
+      await this.flashSalesService.updateStockItemFlashSale(
+        String(itemFlashSale.flashSale.flashSaleId),
+        item._id,
+        quantity,
+      );
+      // flashSale - 1
+    }
+
+    return itemFlashSale;
+  }
+
+  async findItemByIdAndUpdateSold(
+    itemId: string,
+    sold: number,
+  ): Promise<IItem> {
+    return this.itemsRepository.findByIdAndUpdate(itemId, {
+      $inc: { historicalSold: 1 * sold, countOfSelling: -1 },
+    });
+  }
+
+  async findItemByIdAndUpdateCancel(
+    itemId: string,
+    cancel: number,
+  ): Promise<IItem> {
+    return this.itemsRepository.findByIdAndUpdate(itemId, {
+      $inc: { stock: 1 * cancel, countOfSelling: -1 },
+    });
   }
 
   async findItemByIdAndUpdate(
@@ -114,7 +162,7 @@ export class ItemsService {
     updateItem: IUpdateItem,
   ): Promise<IItem> {
     // IF UPDATE CATEGORY => GET CATEGORY NAME
-    if (updateItem.category.categoryId) {
+    if (updateItem.category && updateItem.category.categoryId) {
       const category = await this.categoriesService.findCategoryById(
         String(updateItem.category.categoryId),
       );
@@ -139,6 +187,20 @@ export class ItemsService {
       this.getItemSummary(item),
     );
 
+    const allFlashSale = await this.flashSalesService.findAllFlashSales();
+
+    allFlashSale.forEach(async (flashSale) => {
+      const flashSaleSummaryItem = this.checkFlashSale(item, flashSale);
+      const flashSaleSummary = flashSaleSummaryItem.flashSale;
+      console.log(flashSaleSummary);
+      if (flashSaleSummary) {
+        await this.flashSalesService.updateFlashSaleItem(
+          String(flashSaleSummary.flashSaleId),
+          item,
+        );
+      }
+    });
+
     return item;
   }
 
@@ -154,7 +216,7 @@ export class ItemsService {
     };
   }
 
-  checkFlashSale(item, flashSale) {
+  checkFlashSale(item, flashSale: IFlashSale): IItem {
     if (!flashSale) {
       return {
         ...item['_doc'],
@@ -163,7 +225,10 @@ export class ItemsService {
     }
 
     const flashSaleItem = flashSale.listItems.find((flashSaleItem) => {
-      return String(flashSaleItem.itemId) === String(item._id);
+      return (
+        flashSaleItem.item &&
+        String(flashSaleItem.item.itemId) === String(item._id)
+      );
     });
 
     if (!flashSaleItem) {
@@ -180,6 +245,7 @@ export class ItemsService {
         startTime: flashSale.startTime,
         endTime: flashSale.endTime,
         priceBeforeDiscount: flashSaleItem.priceBeforeDiscount,
+        stockFlashSale: flashSaleItem.stockFlashSale,
       },
     };
   }

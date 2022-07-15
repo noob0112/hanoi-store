@@ -7,9 +7,6 @@ import {
 
 @Schema({ _id: false })
 export class FlashSaleItemSummary extends ItemSummary {
-  @Prop({ default: null })
-  priceBeforeDiscount?: number;
-
   @Prop({ type: CategorySummarySchema })
   category: CategorySummary;
 }

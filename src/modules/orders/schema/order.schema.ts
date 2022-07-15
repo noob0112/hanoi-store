@@ -24,7 +24,7 @@ export class Order extends TimestampsMongodb {
   @Prop({ require: true, type: [OrderItemSchema] })
   listItems: OrderItem[];
 
-  @Prop({ default: null, type: [OrderVoucherSummarySchema] })
+  @Prop({ default: null, type: OrderVoucherSummarySchema })
   voucher: OrderVoucherSummary;
 
   @Prop({ required: true })
@@ -34,7 +34,7 @@ export class Order extends TimestampsMongodb {
   totalPrice: number;
 
   @Prop({ enum: ORDER_STATUS_ENUM, default: ORDER_STATUS_ENUM.CONFIRMED })
-  status: ORDER_STATUS_ENUM;
+  status?: ORDER_STATUS_ENUM;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

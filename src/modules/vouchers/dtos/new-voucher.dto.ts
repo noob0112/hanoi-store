@@ -50,5 +50,6 @@ export class NewVoucherDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
+  @Min(1)
   discount: number;
 }

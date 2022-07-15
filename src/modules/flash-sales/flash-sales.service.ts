@@ -30,6 +30,14 @@ export class FlashSalesService {
   }
 
   async findAllFlashSales(): Promise<IFlashSale[]> {
+    return await this.flashSalesRepository
+      .find({ startTime: { $gte: Date.now() } })
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
+  }
+
+  async findListFlashSales(): Promise<IFlashSale[]> {
     const filter = {};
     const select = {};
     const options = {
@@ -63,6 +71,33 @@ export class FlashSalesService {
     return this.flashSalesRepository.findOne(filter, select);
   }
 
+  updateFlashSaleItem(flashSaleId: string, item: IItem) {
+    return this.flashSalesRepository.updateOne(
+      {
+        _id: flashSaleId,
+        startTime: { $gte: Date.now() },
+        'listItems.item.itemId': item._id,
+      },
+      { $set: { 'listItems.$.item': this.getFlashSaleItem(item) } },
+      { fields: { 'listItems.$.item': 1 }, new: true },
+    );
+  }
+
+  updateStockItemFlashSale(
+    flashSaleId: string,
+    itemId: string,
+    quantity: number,
+  ) {
+    return this.flashSalesRepository.updateOne(
+      {
+        _id: flashSaleId,
+        'listItems.item.itemId': itemId,
+      },
+      { $inc: { 'listItems.$.stockFlashSale': -1 * quantity } },
+      { fields: { 'listItems.$': 1 }, new: true },
+    );
+  }
+
   async updateFlashSaleById(
     flasSaleId: string,
     updateFlashSale,
@@ -78,7 +113,7 @@ export class FlashSalesService {
   ): Promise<IFlashSale> {
     const itemIsExisted = await this.flashSalesRepository.findOne({
       _id: flashSaleId,
-      'listItems.itemId': newFlashSaleItem.itemId,
+      'listItems.item.itemId': newFlashSaleItem.itemId,
     });
 
     if (itemIsExisted) {
@@ -88,21 +123,34 @@ export class FlashSalesService {
     const item = await this.itemsService.findItemById(newFlashSaleItem.itemId);
     return this.flashSalesRepository.findByIdAndUpdate(flashSaleId, {
       $push: {
-        listItems: this.getFlashSaleItem(
-          item,
-          newFlashSaleItem.priceBeforeDiscount,
-        ),
+        listItems: {
+          item: this.getFlashSaleItem(item),
+          priceBeforeDiscount: newFlashSaleItem.priceBeforeDiscount,
+          stockFlashSale: newFlashSaleItem.stockFlashSale,
+        },
       },
     });
   }
 
-  getFlashSaleItem(item: IItem, priceBeforeDiscount: number) {
+  async findFlashSaleAndDeleteById(flashSaleId): Promise<void | boolean> {
+    const flashSale = await this.flashSalesRepository
+      .findByIdAndDelete(flashSaleId)
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
+
+    if (!flashSale) {
+      throw new InternalServerErrorException('Flash sale does not exist!');
+    }
+    return;
+  }
+
+  private getFlashSaleItem(item: IItem) {
     return {
       itemId: item._id,
       itemName: item.name,
       barCode: item.barCode,
       price: item.price,
-      priceBeforeDiscount,
       avataImage: item.avataImage,
       stock: item.stock,
       historicalSold: item.historicalSold,

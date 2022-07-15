@@ -4,7 +4,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-
 import { VouchersRepository } from './vouchers.repository';
 import {
   INewVoucher,
@@ -13,6 +12,7 @@ import {
   IQueryVoucher,
 } from './entities';
 import { VOUCHER_OPTIONS_ENUM } from './vouchers.constant';
+import { objectId } from 'src/common/types';
 
 @Injectable()
 export class VouchersService {
@@ -59,14 +59,22 @@ export class VouchersService {
     );
   }
 
-  findVoucherByIdAndUpdateQuatity(voucherId: string): Promise<IVoucher> {
-    return this.vouchersRepository
+  async findVoucherByIdAndUpdateQuatity(
+    voucherId: string | objectId,
+  ): Promise<IVoucher> {
+    const voucher = await this.vouchersRepository
       .findByIdAndUpdate(voucherId, {
         $inc: { quantity: -1 },
       })
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
+
+    if (!voucher) {
+      throw new NotFoundException('voucher does not exist!');
+    }
+
+    return voucher;
   }
 
   async findVoucherByIdAndDelete(voucherId: string): Promise<boolean | void> {

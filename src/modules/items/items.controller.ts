@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { ObjectIdDto } from 'src/common/dtos';
+import { ObjectIdDto } from '../../common/dtos';
 import { NewItemDto, UpdateItemDto } from './dtos';
 import { QueryItemDto } from './dtos/query-item.dto';
 import { IItem } from './entities';
@@ -18,7 +18,7 @@ export class ItemsController {
   }
 
   @Get()
-  findListItem(@Query() query: QueryItemDto): Promise<IItem[]> {
+  findListItem(@Query() query?: QueryItemDto): Promise<IItem[]> {
     return this.itemsService.findAllItem(query);
   }
 

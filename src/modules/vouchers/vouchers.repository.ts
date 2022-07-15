@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ClientSession } from 'mongoose';
 import { EntityRepository } from '../../database';
 import { VoucherDocument } from './schema';
 
@@ -33,5 +33,16 @@ export class VouchersRepository extends EntityRepository<VoucherDocument> {
 
         return voucher;
       });
+  }
+
+  findVoucherByIdAndUpdate(
+    id: string,
+    updateVoucher: unknown,
+    options: unknown = { new: true },
+    session: ClientSession | null = null,
+  ) {
+    return this.entityModel
+      .findByIdAndUpdate(id, updateVoucher, options)
+      .session(session);
   }
 }

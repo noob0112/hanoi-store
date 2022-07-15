@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos';
 import {
@@ -22,7 +30,7 @@ export class FlashSalesController {
 
   @Get()
   findAllFlashSales(): Promise<IFlashSale[]> {
-    return this.flashSalesService.findAllFlashSales();
+    return this.flashSalesService.findListFlashSales();
   }
 
   @Get(':id')
@@ -66,5 +74,12 @@ export class FlashSalesController {
       param.id,
       newFlashSaleItemDto,
     );
+  }
+
+  @Delete(':id')
+  findFlashSaleAndDeleteById(
+    @Param() param: ObjectIdDto,
+  ): Promise<void | boolean> {
+    return this.flashSalesService.findFlashSaleAndDeleteById(param.id);
   }
 }

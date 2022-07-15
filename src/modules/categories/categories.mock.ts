@@ -17,6 +17,10 @@ export const mockError = {
 
 export const mockCategoryId = 'test';
 
+export const mockDeleteCategory = {
+  listItems: [],
+};
+
 export const mockCategory: ICategory = {
   _id: 'test',
   name: 'test',

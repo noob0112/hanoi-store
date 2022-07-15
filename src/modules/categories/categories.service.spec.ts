@@ -5,6 +5,7 @@ import {
   mockCategory,
   mockCategoryId,
   mockCategoryItemSummary,
+  mockDeleteCategory,
   mockError,
   mockNewCategory,
   mockUpdateCategory,
@@ -85,6 +86,24 @@ describe('CategoriesService', () => {
       mockCategorysRepository.find.mockRejectedValue(mockError);
 
       await service.findAllCategories().catch((error) => {
+        expect(error.message).toEqual(mockError.message);
+      });
+    });
+  });
+
+  describe('findListCategories', () => {
+    it('[Expect-Success] should be return list categories', async () => {
+      mockCategorysRepository.find.mockResolvedValue([mockCategory]);
+
+      const result = await service.findListCategories();
+
+      expect(result).toEqual([mockCategory]);
+    });
+
+    it('[Expect-fails] Sever error', async () => {
+      mockCategorysRepository.find.mockRejectedValue(mockError);
+
+      await service.findListCategories().catch((error) => {
         expect(error.message).toEqual(mockError.message);
       });
     });
@@ -197,26 +216,43 @@ describe('CategoriesService', () => {
 
   describe('findAndDeleteCategoryById', () => {
     it('[Expect-Success] should be delete category', async () => {
-      mockCategorysRepository.findByIdAndDelete.mockResolvedValue(mockCategory);
+      mockCategorysRepository.findById.mockResolvedValue(mockDeleteCategory);
+      mockCategorysRepository.findByIdAndDelete.mockResolvedValue(
+        mockDeleteCategory,
+      );
 
       const result = await service.findAndDeleteCategoryById(mockCategoryId);
 
       expect(result).toReturn;
     });
 
-    it('[Expect-fails] Sever error', async () => {
-      mockCategorysRepository.findByIdAndDelete.mockRejectedValue(mockError);
-
-      await service.findAndDeleteCategoryById(mockCategoryId).catch((error) => {
-        expect(error.message).toEqual(mockError.message);
-      });
-    });
-
     it('[Expect-fails] Category Id is incorrect or not exist', async () => {
+      mockCategorysRepository.findById.mockResolvedValue(undefined);
       mockCategorysRepository.findByIdAndDelete.mockResolvedValue(undefined);
 
       await service.findAndDeleteCategoryById(mockCategoryId).catch((error) => {
         expect(error.message).toEqual('Category Id is incorrect or not exist!');
+      });
+    });
+
+    it('[Expect-fails] listItems is not []', async () => {
+      mockCategorysRepository.findById.mockResolvedValue(mockCategory);
+      mockCategorysRepository.findByIdAndDelete.mockResolvedValue(mockCategory);
+      await service.findAndDeleteCategoryById(mockCategoryId).catch((error) => {
+        expect(error.message).toEqual(
+          'You can not delete category when has item',
+        );
+      });
+    });
+
+    it('[Expect-fails] Sever error', async () => {
+      const category = mockCategory;
+      category.listItems = [];
+      mockCategorysRepository.findById.mockResolvedValue(mockDeleteCategory);
+      mockCategorysRepository.findByIdAndDelete.mockRejectedValue(mockError);
+
+      await service.findAndDeleteCategoryById(mockCategoryId).catch((error) => {
+        expect(error.message).toEqual(mockError.message);
       });
     });
   });

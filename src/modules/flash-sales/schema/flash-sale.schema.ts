@@ -1,10 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { TimestampsMongodb } from 'src/common/schemas';
-import {
-  FlashSaleItemSummary,
-  FlashSaleItemSummarySchema,
-} from './flash-sale-item-summary';
+import { FlashSaleItem, FlashSaleItemSchema } from './flash-sale-item';
 
 export type FlashSaleDocument = FlashSale & Document;
 
@@ -22,8 +19,8 @@ export class FlashSale extends TimestampsMongodb {
   @Prop({ default: false })
   isOnGoing: boolean;
 
-  @Prop({ type: [FlashSaleItemSummarySchema], default: [] })
-  listItems: FlashSaleItemSummary[];
+  @Prop({ type: [FlashSaleItemSchema], default: [] })
+  listItems: FlashSaleItem[];
 }
 
 export const FlashSaleSchema = SchemaFactory.createForClass(FlashSale);
