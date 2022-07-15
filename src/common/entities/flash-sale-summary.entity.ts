@@ -5,4 +5,5 @@ export interface IFlashSaleSummary {
   startTime: Date;
   endTime: Date;
   priceBeforeDiscount: number;
+  stockFlashSale?: number;
 }
