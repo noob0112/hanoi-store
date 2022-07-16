@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+
 import { VouchersRepository } from './vouchers.repository';
 import {
   INewVoucher,
@@ -20,8 +21,19 @@ export class VouchersService {
 
   async createVoucher(newVoucher: INewVoucher): Promise<IVoucher> {
     return await this.vouchersRepository.create(newVoucher).catch((error) => {
-      if (Object.keys(error.keyPattern)[0])
+      if (error.keyPattern && Object.keys(error.keyPattern)[0])
         throw new BadRequestException('Code of voucher is existed!');
+      throw new InternalServerErrorException(error.message);
+    });
+  }
+
+  findListVoucher(query?: IQueryVoucher): Promise<IVoucher[]> {
+    const options = {
+      limit: VOUCHER_OPTIONS_ENUM.LIMIT,
+      skip: VOUCHER_OPTIONS_ENUM.LIMIT * ((query?.page - 1) | 0),
+    };
+
+    return this.vouchersRepository.find({}, {}, options).catch((error) => {
       throw new InternalServerErrorException(error.message);
     });
   }
@@ -30,7 +42,7 @@ export class VouchersService {
     const voucher = await this.vouchersRepository
       .findById(voucherId)
       .catch((error) => {
-        throw new BadRequestException(error.message);
+        throw new InternalServerErrorException(error.message);
       });
 
     if (!voucher) {
@@ -40,26 +52,18 @@ export class VouchersService {
     return voucher;
   }
 
-  findListVoucher(query: IQueryVoucher): Promise<IVoucher[]> {
-    const options = {
-      limit: VOUCHER_OPTIONS_ENUM.LIMIT,
-      skip: VOUCHER_OPTIONS_ENUM.LIMIT * ((query.page - 1) | 0),
-    };
-
-    return this.vouchersRepository.find({}, {}, options);
-  }
-
   async findVoucherByIdAndUpdate(
     voucherId: string,
     updateVoucher: IUpdateVoucher,
   ): Promise<IVoucher> {
-    return this.vouchersRepository.findOneAndUpdateCustom(
-      voucherId,
-      updateVoucher,
-    );
+    return this.vouchersRepository
+      .findOneAndUpdateCustom(voucherId, updateVoucher)
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
   }
 
-  async findVoucherByIdAndUpdateQuatity(
+  async findVoucherByIdAndUpdateQuantity(
     voucherId: string | objectId,
   ): Promise<IVoucher> {
     const voucher = await this.vouchersRepository
@@ -78,15 +82,15 @@ export class VouchersService {
   }
 
   async findVoucherByIdAndDelete(voucherId: string): Promise<boolean | void> {
-    await this.vouchersRepository
+    const voucher = await this.vouchersRepository
       .findByIdAndDelete(voucherId)
-      .then((voucher) => {
-        if (voucher) return true;
-        throw new NotFoundException('Voucher Id is incorrect or not existed!');
-      })
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
+
+    if (!voucher) {
+      throw new NotFoundException('Voucher Id is incorrect or not existed!');
+    }
 
     return;
   }

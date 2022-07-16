@@ -7,7 +7,10 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { isMoreThanDateNow, isMoreThanStartTime } from 'src/common/custom-dtos';
+import {
+  isMoreThanDateNow,
+  isMoreThanStartTime,
+} from '../../../common/custom-dtos';
 
 export class NewVoucherDto {
   @ApiProperty()
