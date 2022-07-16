@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class UpdateCategoryDto {
   @ApiProperty()
   @IsOptional()
-  @IsString()
+  @IsUrl()
   banner?: string;
 
   @ApiProperty()

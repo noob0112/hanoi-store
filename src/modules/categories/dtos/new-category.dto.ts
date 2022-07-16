@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export class NewCategoryDto {
   @ApiProperty()
@@ -9,6 +9,6 @@ export class NewCategoryDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   banner: string;
 }
