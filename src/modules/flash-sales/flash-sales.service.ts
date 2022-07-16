@@ -6,9 +6,9 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { NewFlashSaleDto } from './dtos/new-flash-sale.dto';
+
 import { FlashSalesRepository } from './flash-sales.repository';
-import { IFlashSale, IFlashSaleAddItem } from './entities';
+import { IFlashSale, IFlashSaleAddItem, INewFlashSale } from './entities';
 import { FLASH_SALES_OPTIONS_ENUM } from './flash-sales.constant';
 import { ItemsService } from '../items/items.service';
 import { IItem } from '../items/entities';
@@ -21,7 +21,7 @@ export class FlashSalesService {
     readonly itemsService: ItemsService,
   ) {}
 
-  async creatFlashSale(newFlashSale: NewFlashSaleDto): Promise<IFlashSale> {
+  async creatFlashSale(newFlashSale: INewFlashSale): Promise<IFlashSale> {
     return await this.flashSalesRepository
       .create(newFlashSale)
       .catch((error) => {
