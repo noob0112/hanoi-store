@@ -1,6 +1,6 @@
 // import { IFlashSaleItemSummary } from './flash-sale-item-summary.entity';
 
-import { ICategorySummary, IItemSummary } from 'src/common/entities';
+import { ICategorySummary, IItemSummary } from '../../../common/entities';
 
 export interface IFlashSale {
   _id: string;

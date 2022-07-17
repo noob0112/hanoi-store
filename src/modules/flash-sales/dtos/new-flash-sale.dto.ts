@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
-import { isMoreThanDateNow, isMoreThanStartTime } from 'src/common/custom-dtos';
+import {
+  isMoreThanDateNow,
+  isMoreThanStartTime,
+} from '../../../common/custom-dtos';
 
 export class NewFlashSaleDto {
   @ApiProperty()

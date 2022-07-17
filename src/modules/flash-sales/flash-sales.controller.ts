@@ -6,9 +6,10 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ObjectIdDto } from 'src/common/dtos';
+import { ObjectIdDto } from '../../common/dtos';
 import {
   NewFlashSaleDto,
   FlashSaleAddItemDto,
@@ -17,6 +18,7 @@ import {
 } from './dtos';
 import { FlashSalesService } from './flash-sales.service';
 import { IFlashSale } from './entities';
+import { QueryFlashSaleDto } from './dtos/query-flash-sale.dto';
 
 @Controller('flash-sales')
 @ApiTags('flash-sales')
@@ -25,12 +27,14 @@ export class FlashSalesController {
 
   @Post()
   createFlashSale(@Body() newFlashSale: NewFlashSaleDto): Promise<IFlashSale> {
-    return this.flashSalesService.creatFlashSale(newFlashSale);
+    return this.flashSalesService.createFlashSale(newFlashSale);
   }
 
   @Get()
-  findAllFlashSales(): Promise<IFlashSale[]> {
-    return this.flashSalesService.findListFlashSales();
+  findListFlashSales(
+    @Query() query?: QueryFlashSaleDto,
+  ): Promise<IFlashSale[]> {
+    return this.flashSalesService.findListFlashSales(query);
   }
 
   @Get(':id')
@@ -38,10 +42,10 @@ export class FlashSalesController {
     return this.flashSalesService.findFlashSaleById(param.id);
   }
 
-  @Get(':id/detail')
-  findFlashSaleDetailById(@Param() param: ObjectIdDto): Promise<IFlashSale> {
-    return this.flashSalesService.findFlashSaleById(param.id);
-  }
+  // @Get(':id/detail')
+  // findFlashSaleDetailById(@Param() param: ObjectIdDto): Promise<IFlashSale> {
+  //   return this.flashSalesService.findFlashSaleById(param.id);
+  // }
 
   @Put(':id')
   updateFlashSaleById(

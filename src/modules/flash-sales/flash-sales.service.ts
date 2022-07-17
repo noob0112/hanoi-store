@@ -8,7 +8,14 @@ import {
 } from '@nestjs/common';
 
 import { FlashSalesRepository } from './flash-sales.repository';
-import { IFlashSale, IFlashSaleAddItem, INewFlashSale } from './entities';
+import {
+  IFlashSale,
+  IFlashSaleAddItem,
+  IItemSummary,
+  INewFlashSale,
+  IQueryFlashSale,
+  IUpdateFlashSale,
+} from './entities';
 import { FLASH_SALES_OPTIONS_ENUM } from './flash-sales.constant';
 import { ItemsService } from '../items/items.service';
 import { IItem } from '../items/entities';
@@ -21,7 +28,7 @@ export class FlashSalesService {
     readonly itemsService: ItemsService,
   ) {}
 
-  async creatFlashSale(newFlashSale: INewFlashSale): Promise<IFlashSale> {
+  async createFlashSale(newFlashSale: INewFlashSale): Promise<IFlashSale> {
     return await this.flashSalesRepository
       .create(newFlashSale)
       .catch((error) => {
@@ -37,11 +44,12 @@ export class FlashSalesService {
       });
   }
 
-  async findListFlashSales(): Promise<IFlashSale[]> {
+  async findListFlashSales(query?: IQueryFlashSale): Promise<IFlashSale[]> {
     const filter = {};
     const select = {};
     const options = {
       limit: FLASH_SALES_OPTIONS_ENUM.LIMIT,
+      skip: FLASH_SALES_OPTIONS_ENUM.LIMIT * ((query?.page - 1) | 0),
     };
 
     return await this.flashSalesRepository
@@ -55,10 +63,11 @@ export class FlashSalesService {
     flashSaleId: string,
     select = {},
   ): Promise<IFlashSale> {
-    const flashSale = await this.flashSalesRepository.findById(
-      flashSaleId,
-      select,
-    );
+    const flashSale = await this.flashSalesRepository
+      .findById(flashSaleId, select)
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
 
     if (!flashSale) {
       throw new NotFoundException('Flash sale does not exist!');
@@ -67,11 +76,11 @@ export class FlashSalesService {
     return flashSale;
   }
 
-  async findOneFlashSale(filter = {}, select = {}) {
+  public async findOneFlashSale(filter = {}, select = {}) {
     return this.flashSalesRepository.findOne(filter, select);
   }
 
-  updateFlashSaleItem(flashSaleId: string, item: IItem) {
+  public updateFlashSaleItem(flashSaleId: string, item: IItem) {
     return this.flashSalesRepository.updateOne(
       {
         _id: flashSaleId,
@@ -83,7 +92,7 @@ export class FlashSalesService {
     );
   }
 
-  updateStockItemFlashSale(
+  public updateStockItemFlashSale(
     flashSaleId: string,
     itemId: string,
     quantity: number,
@@ -100,36 +109,48 @@ export class FlashSalesService {
 
   async updateFlashSaleById(
     flasSaleId: string,
-    updateFlashSale,
+    updateFlashSale: IUpdateFlashSale,
   ): Promise<IFlashSale> {
-    return await this.flashSalesRepository.findByIdAndUpdate(flasSaleId, {
-      $set: updateFlashSale,
-    });
+    return await this.flashSalesRepository
+      .findByIdAndUpdate(flasSaleId, {
+        $set: updateFlashSale,
+      })
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
   }
 
   async addItemToFlashSale(
     flashSaleId: string,
     newFlashSaleItem: IFlashSaleAddItem,
   ): Promise<IFlashSale> {
-    const itemIsExisted = await this.flashSalesRepository.findOne({
-      _id: flashSaleId,
-      'listItems.item.itemId': newFlashSaleItem.itemId,
-    });
+    const itemIsExisted = await this.flashSalesRepository
+      .findOne({
+        _id: flashSaleId,
+        'listItems.item.itemId': newFlashSaleItem.itemId,
+      })
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
 
     if (itemIsExisted) {
       throw new BadRequestException('Item is existed in flash sale!');
     }
 
     const item = await this.itemsService.findItemById(newFlashSaleItem.itemId);
-    return this.flashSalesRepository.findByIdAndUpdate(flashSaleId, {
-      $push: {
-        listItems: {
-          item: this.getFlashSaleItem(item),
-          priceBeforeDiscount: newFlashSaleItem.priceBeforeDiscount,
-          stockFlashSale: newFlashSaleItem.stockFlashSale,
+    return this.flashSalesRepository
+      .findByIdAndUpdate(flashSaleId, {
+        $push: {
+          listItems: {
+            item: this.getFlashSaleItem(item),
+            priceBeforeDiscount: newFlashSaleItem.priceBeforeDiscount,
+            stockFlashSale: newFlashSaleItem.stockFlashSale,
+          },
         },
-      },
-    });
+      })
+      .catch((error) => {
+        throw new InternalServerErrorException(error.message);
+      });
   }
 
   async findFlashSaleAndDeleteById(flashSaleId): Promise<void | boolean> {
@@ -145,7 +166,7 @@ export class FlashSalesService {
     return;
   }
 
-  private getFlashSaleItem(item: IItem) {
+  private getFlashSaleItem(item: IItem): IItemSummary {
     return {
       itemId: item._id,
       itemName: item.name,
