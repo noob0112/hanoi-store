@@ -20,14 +20,16 @@ export class UploadService {
     return await this.uploadS3(file.buffer, urlKey);
   }
 
-  async uploadS3(file, name) {
+  private uploadS3(file, name: string) {
     const s3 = this.getS3();
+
     const params = {
       Bucket: this.configS3.AWS_S3_BUCKET_NAME,
       Key: String(name),
       Body: file,
       ACL: 'public-read',
     };
+
     return new Promise((resolve, reject) => {
       s3.upload(params, (err, data) => {
         if (err) {
@@ -42,7 +44,7 @@ export class UploadService {
     });
   }
 
-  getS3() {
+  private getS3() {
     return new S3({
       endpoint: this.configS3.AWS_S3_END_POINT,
       accessKeyId: this.configS3.AWS_ACCESS_KEY_ID,

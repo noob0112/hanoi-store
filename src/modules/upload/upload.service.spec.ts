@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { S3 } from 'aws-sdk';
 import { BUCKETPATH_ENUM } from './upload.constants';
 import { mockFile, mockUploadS3 } from './upload.mock';
 import { UploadService } from './upload.service';
@@ -21,42 +20,26 @@ describe('UploadService', () => {
 
   describe('upload', () => {
     it('[Expect-Success] return key and publicUrl', async () => {
-      service.uploadS3 = jest.fn().mockReturnValue(mockUploadS3);
+      jest.mock('aws-sdk', () => {
+        return {
+          upload: jest.fn().mockReturnThis().mockResolvedValue(mockUploadS3),
+          promise: jest.fn().mockReturnValueOnce({ Bucket: 'TestBucketName' }),
+        };
+      });
+      // const s3 = new S3(mockBodyS3);
+
+      // let testS3;
+      // beforeEach(() => {
+      //   testS3 = new S3();
+      //   testS3.promise.mockReturnValueOnce({ Bucket: 'TestBucketName' });
+      // });
 
       const result = await service.upload(
         mockFile,
-        BUCKETPATH_ENUM['ITEM-IMAGE'],
+        BUCKETPATH_ENUM['CATEGORY-IMAGE'],
       );
 
       expect(result).toEqual(mockUploadS3);
     });
   });
-
-  // describe('uploadS3', () => {
-  //   it('[Expect-Success] return key and publicUrl', async () => {
-  //     const file = {
-  //       fieldname: 'fieldname',
-  //       originalname: 'originalname',
-  //       encoding: 'encoding',
-  //       mimetype: 'mimetype',
-  //       buffer: 'buffer',
-  //       size: 3392,
-  //     };
-
-  //     const mockUploadS3 = {
-  //       key: 'key',
-  //       publicUrl: 'publicUrl',
-  //     };
-
-  //     service.getS3 = jest.fn();
-
-  //     service.getS3 = jest.fn().mockImplementation(() => {
-  //       return { upload: jest.fn().mockResolvedValue(mockUploadS3) };
-  //     });
-
-  //     const result = await service.uploadS3(file, file.originalname);
-
-  //     expect(result).toEqual(mockUploadS3);
-  //   });
-  // });
 });
