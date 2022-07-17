@@ -25,7 +25,7 @@ export class UsersService {
           case 'phoneNumber':
             throw new BadRequestException('phoneNumber is existed!');
         }
-      throw new InternalServerErrorException('Internal_Server_Error');
+      throw new InternalServerErrorException(error.message);
     });
   }
 

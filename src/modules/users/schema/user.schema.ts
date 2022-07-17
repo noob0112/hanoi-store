@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { TimestampsMongodb } from 'src/common/schemas/time-stamps.schema';
+import { TimestampsMongodb } from '../../../common/schemas/time-stamps.schema';
 import { ROLE_ENUM, USER_STATUS_ENUM } from '../users.constant';
 
 export type UserDocument = User & Document;
