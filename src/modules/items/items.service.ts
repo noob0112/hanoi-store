@@ -8,12 +8,11 @@ import {
 } from '@nestjs/common';
 
 import { CategoriesService } from '../categories/categories.service';
+import { ItemsRepository } from './items.repository';
+import { FlashSalesService } from '../flash-sales/flash-sales.service';
 import { ICategoryItemSummary } from '../categories/entities';
 import { IFlashSale } from '../flash-sales/entities';
-import { FlashSalesService } from '../flash-sales/flash-sales.service';
-
 import { IItem, INewItem, IQueryItem, IUpdateItem } from './entities';
-import { ItemsRepository } from './items.repository';
 
 @Injectable()
 export class ItemsService {
@@ -50,7 +49,7 @@ export class ItemsService {
     return item;
   }
 
-  async findAllItem(query: IQueryItem): Promise<IItem[]> {
+  async findListItems(query?: IQueryItem): Promise<IItem[]> {
     const listItems = await this.itemsRepository
       .findListItem(query)
       .catch((error) => {
@@ -202,6 +201,11 @@ export class ItemsService {
     });
 
     return item;
+  }
+
+  findItemByIdAndDelete(itemId: string): Promise<void | boolean> {
+    this.itemsRepository.findByIdAndDelete(itemId);
+    return;
   }
 
   getItemSummary(item): ICategoryItemSummary {

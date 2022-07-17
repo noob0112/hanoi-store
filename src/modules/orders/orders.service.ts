@@ -1,24 +1,23 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
+  // InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+// import { InjectConnection } from '@nestjs/mongoose';
+// import * as mongoose from 'mongoose';
 import { objectId } from 'src/common/types';
 
+import { OrdersRepository } from './orders.repository';
 import { CategoriesService } from '../categories/categories.service';
 import { FlashSalesService } from '../flash-sales/flash-sales.service';
-import { IItem } from '../items/entities';
 import { ItemsService } from '../items/items.service';
-import { IUser } from '../users/entities';
 import { UsersService } from '../users/users.service';
-import { IVoucher } from '../vouchers/entities';
 import { VouchersService } from '../vouchers/vouchers.service';
-import { UpdateOrderStatusDto } from './dtos';
-import { IOrder, INewOrder } from './entities';
+import { IItem } from '../items/entities';
+import { IUser } from '../users/entities';
+import { IVoucher } from '../vouchers/entities';
+import { IOrder, INewOrder, IUpdateOrderStatus } from './entities';
 import { ORDER_STATUS_ENUM } from './orders.constant';
-import { OrdersRepository } from './orders.repository';
 
 @Injectable()
 export class OrdersService {
@@ -28,8 +27,7 @@ export class OrdersService {
     readonly vouchersService: VouchersService,
     readonly flashSalesService: FlashSalesService,
     readonly categoriesService: CategoriesService,
-    readonly usersService: UsersService,
-    @InjectConnection() private readonly connection: mongoose.Connection,
+    readonly usersService: UsersService, // @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
   // Create Order
@@ -46,29 +44,27 @@ export class OrdersService {
     // session.startTransaction();
 
     const task = [];
-    const promiseUser = new Promise((resolve, reject) => {
-      this.usersService
-        .findUserById(userId)
-        .then((user) => {
-          resolve(user);
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    const promiseUser = new Promise((resolve) => {
+      this.usersService.findUserById(userId).then((user) => {
+        resolve(user);
+      });
+      // .catch((error) => {
+      //   reject(error);
+      // });
     });
 
     task.push(promiseUser);
 
     if (order.voucherId) {
-      const promiseVoucher = new Promise((resolve, reject) => {
+      const promiseVoucher = new Promise((resolve) => {
         this.vouchersService
-          .findVoucherByIdAndUpdateQuatity(order.voucherId)
+          .findVoucherByIdAndUpdateQuantity(order.voucherId)
           .then((doc) => {
             resolve(doc);
-          })
-          .catch((error) => {
-            reject(error);
           });
+        // .catch((error) => {
+        //   reject(error);
+        // });
       });
 
       task.push(promiseVoucher);
@@ -76,7 +72,7 @@ export class OrdersService {
 
     order.listItems.forEach((itemDetail) => {
       task.push(
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
           this.itemsService
             .findItemByIdAndUpdateStock(
               String(itemDetail.itemId),
@@ -84,10 +80,10 @@ export class OrdersService {
             )
             .then((doc) => {
               resolve({ item: doc, quantity: itemDetail.quantity });
-            })
-            .catch((error) => {
-              reject(error);
             });
+          // .catch((error) => {
+          //   reject(error);
+          // });
         }),
       );
     });
@@ -95,17 +91,15 @@ export class OrdersService {
     try {
       // HAVE VOUCHER => task[user, voucher, ...listItems]
       if (order.voucherId) {
-        const [user, voucher, ...listItems] = await Promise.all(task)
-          .then((docs) => {
+        const [user, voucher, ...listItems] = await Promise.all(task).then(
+          (docs) => {
             return docs;
-          })
-          .catch((error) => {
-            throw new InternalServerErrorException(error.message);
-          });
+          },
+        );
+        // .catch((error) => {
+        //   throw new InternalServerErrorException(error.message);
+        // });
 
-        console.log(voucher);
-
-        // newOrder.listItems =
         listItems.forEach(({ item, quantity }) => {
           newOrder.listItems.push({
             item: this.getOrderItemSummary(item),
@@ -190,7 +184,7 @@ export class OrdersService {
 
   async findOrderByIdAndUpdateStatus(
     orderId: string | objectId,
-    updateOrderStatus: UpdateOrderStatusDto,
+    updateOrderStatus: IUpdateOrderStatus,
   ) {
     const order = await this.ordersRepository.findById(orderId);
     if (

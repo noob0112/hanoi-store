@@ -4,7 +4,7 @@ import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import { ITEM_ORDER_BY_ENUM, ITEM_SORT_BY_ENUM } from '../items.constant';
 
 export class QueryItemDto {
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

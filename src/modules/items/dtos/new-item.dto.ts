@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CategorySummaryDto } from 'src/common/dtos';
+import { CategorySummaryDto } from '../../../common/dtos';
 
 export class NewItemDto {
   @ApiProperty()

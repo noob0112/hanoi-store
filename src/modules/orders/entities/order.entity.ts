@@ -3,7 +3,7 @@ import { objectId } from '../../../common/types';
 import { ORDER_STATUS_ENUM } from '../orders.constant';
 
 export interface IOrder {
-  _id?: objectId | string;
+  _id?: string;
   user: IOrderUser;
   listItems: IOrderItem[];
   voucher?: IOrderVoucher;

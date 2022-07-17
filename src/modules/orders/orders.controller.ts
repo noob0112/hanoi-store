@@ -7,7 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ObjectIdDto } from 'src/common/dtos';
+import { ObjectIdDto } from '../../common/dtos';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';

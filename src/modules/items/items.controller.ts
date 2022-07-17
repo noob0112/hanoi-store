@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ObjectIdDto } from '../../common/dtos';
@@ -18,8 +27,8 @@ export class ItemsController {
   }
 
   @Get()
-  findListItem(@Query() query?: QueryItemDto): Promise<IItem[]> {
-    return this.itemsService.findAllItem(query);
+  findListItems(@Query() query?: QueryItemDto): Promise<IItem[]> {
+    return this.itemsService.findListItems(query);
   }
 
   @Get(':id')
@@ -28,10 +37,15 @@ export class ItemsController {
   }
 
   @Put(':id')
-  findAndUpdateItemById(
+  findItemByIdAndUpdate(
     @Param() param: ObjectIdDto,
     @Body() updateItem: UpdateItemDto,
   ): Promise<IItem> {
     return this.itemsService.findItemByIdAndUpdate(param.id, updateItem);
+  }
+
+  @Delete(':id')
+  findItemByIdAndDelete(@Param() param: ObjectIdDto) {
+    return this.itemsService.findItemByIdAndDelete(param.id);
   }
 }

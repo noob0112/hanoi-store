@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { USER_STATUS_ENUM } from 'src/modules/users/users.constant';
+import { USER_STATUS_ENUM } from '../../../modules/users/users.constant';
 
 @Injectable()
 export class VerifyGuard implements CanActivate {

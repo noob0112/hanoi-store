@@ -1,6 +1,6 @@
 export interface INewOrder {
   listItems: INewOrderItem[];
-  voucherId: string;
+  voucherId?: string;
 }
 
 interface INewOrderItem {

@@ -18,6 +18,22 @@ export const mockFlashSale: IFlashSale = {
   startTime: undefined,
   endTime: undefined,
   isOnGoing: false,
+  listItems: [
+    {
+      item: {
+        itemId: '',
+        itemName: '',
+        category: { categoryId: '', categoryName: '' },
+        barCode: '',
+        price: 1,
+        avatarImage: '',
+        stock: 1,
+        historicalSold: 1,
+      },
+      priceBeforeDiscount: 1,
+      stockFlashSale: 1,
+    },
+  ],
 };
 
 export const mockNewFlashSaleItem: IFlashSaleAddItem = {

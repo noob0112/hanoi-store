@@ -17,13 +17,13 @@ export class NewOrderDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsArray()
-  listItems: [OrderItemDto];
+  listItems: OrderItemDto[];
 
   @ApiProperty()
   @IsOptional()
   @IsMongoId()
   @IsString()
-  voucherId: string;
+  voucherId?: string;
 }
 
 class OrderItemDto {
