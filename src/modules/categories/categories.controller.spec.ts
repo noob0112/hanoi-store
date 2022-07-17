@@ -15,6 +15,7 @@ describe('CategoriesController', () => {
   const mockCategorysService = {
     createCategory: jest.fn(),
     findAllCategories: jest.fn(),
+    findListCategories: jest.fn(),
     findCategoryById: jest.fn(),
     findAndUpdateCategoryById: jest.fn(),
     findAndDeleteCategoryById: jest.fn(),
@@ -48,7 +49,7 @@ describe('CategoriesController', () => {
 
   describe('findAllCategories', () => {
     it('[Expect-Success] should return list categories', async () => {
-      mockCategorysService.findAllCategories.mockResolvedValue([mockCategory]);
+      mockCategorysService.findListCategories.mockResolvedValue([mockCategory]);
 
       const result = await controller.findListCategories();
 

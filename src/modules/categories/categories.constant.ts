@@ -2,3 +2,7 @@ export enum STATUS_CATEGORY_ENUM {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
 }
+
+export enum CATEGORY_OPTIONS_ENUM {
+  LIMIT = 10,
+}

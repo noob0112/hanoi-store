@@ -9,10 +9,6 @@ import {
 
 export const mockError = {
   message: 'error message',
-  // index: 0,
-  // code: 11000,
-  // keyPattern: { name: 1 },
-  // keyValue: { name: 'smart-phone' },
 };
 
 export const mockCategoryId = 'test';

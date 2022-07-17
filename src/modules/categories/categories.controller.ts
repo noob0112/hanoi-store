@@ -24,7 +24,7 @@ export class CategoriesController {
     return this.categoriesService.createCategory(newCategory);
   }
 
-  // FIND ALL CATEGORY
+  // FIND LIST CATEGORY
   @Get()
   findListCategories(): Promise<ICategory[]> {
     return this.categoriesService.findListCategories();

@@ -131,7 +131,6 @@ export class CategoriesService {
     await this.categoriesRepository
       .findByIdAndDelete(categoryId)
       .catch((error) => {
-        console.log(error);
         throw new InternalServerErrorException(error.message);
       });
 
