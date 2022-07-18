@@ -43,7 +43,7 @@ export class OrdersController {
   // Create Order
   @ApiBearerAuth('Authorization')
   @ApiOperation({ summary: 'Create Order' })
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: 'Create order successfully.',
     type: OrderResponse,
   })
