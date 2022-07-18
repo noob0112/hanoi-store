@@ -46,21 +46,22 @@ export class FlashSalesService {
       new Date(flashSale.startTime).getTime() -
       parseFloat(process.env.TIME_NOTIFICATION) * 60 * 1000;
 
+    if (date < new Date().getTime()) {
+      throw new BadRequestException();
+    }
+
     const job = new CronJob(new Date(date), async () => {
       const allUser = await this.usersService.findAllUser({
         status: USER_STATUS_ENUM.ACTION,
       });
 
-      const allPromise = [];
-      for (let i = 0, length = allUser.length; i < length; i++) {
-        allPromise.push(
-          this.emailService.sendMail(
-            allUser[i].email,
-            flashSale.startTime,
-            'THÔNG BÁO FLASH SALE',
-          ),
+      const allPromise = allUser.map((i) => {
+        return this.emailService.sendMail(
+          i.email,
+          flashSale.startTime,
+          'THÔNG BÁO FLASH SALE',
         );
-      }
+      });
 
       Promise.all(allPromise);
     });

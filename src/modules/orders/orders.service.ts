@@ -44,27 +44,29 @@ export class OrdersService {
     // session.startTransaction();
 
     const task = [];
-    const promiseUser = new Promise((resolve) => {
-      this.usersService.findUserById(userId).then((user) => {
-        resolve(user);
-      });
-      // .catch((error) => {
-      //   reject(error);
-      // });
+    const promiseUser = new Promise((resolve, reject) => {
+      this.usersService
+        .findUserById(userId)
+        .then((user) => {
+          resolve(user);
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
 
     task.push(promiseUser);
 
     if (order.voucherId) {
-      const promiseVoucher = new Promise((resolve) => {
+      const promiseVoucher = new Promise((resolve, reject) => {
         this.vouchersService
           .findVoucherByIdAndUpdateQuantity(order.voucherId)
           .then((doc) => {
             resolve(doc);
+          })
+          .catch((error) => {
+            reject(error);
           });
-        // .catch((error) => {
-        //   reject(error);
-        // });
       });
 
       task.push(promiseVoucher);
@@ -72,7 +74,7 @@ export class OrdersService {
 
     order.listItems.forEach((itemDetail) => {
       task.push(
-        new Promise((resolve) => {
+        new Promise((resolve, reject) => {
           this.itemsService
             .findItemByIdAndUpdateStock(
               String(itemDetail.itemId),
@@ -80,10 +82,10 @@ export class OrdersService {
             )
             .then((doc) => {
               resolve({ item: doc, quantity: itemDetail.quantity });
+            })
+            .catch((error) => {
+              reject(error);
             });
-          // .catch((error) => {
-          //   reject(error);
-          // });
         }),
       );
     });
