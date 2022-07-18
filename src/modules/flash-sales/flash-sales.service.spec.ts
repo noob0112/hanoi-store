@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FlashSalesService } from './flash-sales.service';
 import { FlashSalesRepository } from './flash-sales.repository';
 import { ItemsService } from '../items/items.service';
+import { UsersService } from '../users/users.service';
+import { EmailService } from '../emails/emails.service';
+import { SchedulerRegistry } from '@nestjs/schedule';
+
 import {
   mockError,
   mockFlashSale,
@@ -29,14 +33,30 @@ describe('FlashSalesService', () => {
     findItemById: jest.fn(),
   };
 
+  const mockUsersService = {};
+  const mockEmailService = {};
+  const mockSchedulerRegistry = {};
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FlashSalesService, FlashSalesRepository, ItemsService],
+      providers: [
+        FlashSalesService,
+        FlashSalesRepository,
+        ItemsService,
+        UsersService,
+        EmailService,
+        SchedulerRegistry,
+      ],
     })
       .overrideProvider(FlashSalesRepository)
       .useValue(mockFlashSalesRepository)
       .overrideProvider(ItemsService)
       .useValue(mockItemsService)
+      .overrideProvider(UsersService)
+      .useValue(mockUsersService)
+      .overrideProvider(EmailService)
+      .useValue(mockEmailService)
+      .overrideProvider(SchedulerRegistry)
+      .useValue(mockSchedulerRegistry)
       .compile();
 
     service = module.get<FlashSalesService>(FlashSalesService);

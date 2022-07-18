@@ -7,7 +7,7 @@ import { AES, enc } from 'crypto-js';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
 
-import { MailService } from '../emails/emails.service';
+import { EmailService } from '../emails/emails.service';
 import { ILogin, ISignUp, ITokenPayload } from './entities';
 import { USER_STATUS_ENUM } from '../users/users.constant';
 import { UsersService } from '../users/users.service';
@@ -18,7 +18,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
+    private readonly emailService: EmailService,
   ) {}
 
   //SIGNUP
@@ -32,7 +32,7 @@ export class AuthService {
 
     const payload = this.getPayloadToken(user);
 
-    this.mailService.sendUserConfirmation(
+    this.emailService.sendUserConfirmation(
       {
         email: 'hoang011220@gmail.com',
         fullName: 'Hoang Nguyen',
@@ -67,7 +67,7 @@ export class AuthService {
     const accessToken = this.generateToken(payload);
 
     if (userFind.status === USER_STATUS_ENUM.PENDING) {
-      this.mailService.sendUserConfirmation(
+      this.emailService.sendUserConfirmation(
         {
           email: 'hoang011220@gmail.com',
           fullName: 'Hoang Nguyen',

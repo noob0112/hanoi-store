@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from './emails.service';
+import { EmailService } from './emails.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { IMailUser } from '../users/entities';
 
 describe('MailService', () => {
-  let service: MailService;
+  let service: EmailService;
 
   const mockMailerService = {
     sendMail: jest.fn(),
@@ -12,13 +12,13 @@ describe('MailService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [MailService, MailerService],
+      providers: [EmailService, MailerService],
     })
       .overrideProvider(MailerService)
       .useValue(mockMailerService)
       .compile();
 
-    service = module.get<MailService>(MailService);
+    service = module.get<EmailService>(EmailService);
   });
 
   it('should be defined', () => {

@@ -4,7 +4,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { AES } from 'crypto-js';
 
 import { AuthService } from './auth.service';
-import { MailService } from '../emails/emails.service';
+import { EmailService } from '../emails/emails.service';
 import { UsersService } from '../users/users.service';
 import {
   mockLoginReturn,
@@ -45,14 +45,14 @@ describe('AuthService', () => {
           useValue: {},
         },
         AuthService,
-        MailService,
+        EmailService,
         UsersService,
         JwtService,
       ],
     })
       .overrideProvider(UsersService)
       .useValue(mockUsersService)
-      .overrideProvider(MailService)
+      .overrideProvider(EmailService)
       .useValue(mockMailService)
       .overrideProvider(JwtService)
       .useValue(mockJwtService)

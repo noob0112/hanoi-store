@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserSummary } from './user-summary.dto';
 
-export class ResponseLoginDto {
+export class LoginResponse {
   @ApiProperty()
   accessToken: string;
 

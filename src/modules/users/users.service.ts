@@ -35,6 +35,10 @@ export class UsersService {
     });
   }
 
+  findAllUser(query?: unknown, finter = {}): Promise<IUser[]> {
+    return this.usersRepository.find(query, finter);
+  }
+
   async findByIdAndUpdateStatus(
     id: string,
     status: USER_STATUS_ENUM,

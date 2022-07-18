@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { CategorySummaryDto } from '../../../common/dtos';
@@ -38,7 +39,7 @@ export class NewItemDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsUrl()
   avataImage: string;
 
   @ApiProperty()

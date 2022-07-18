@@ -6,7 +6,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-
+import { CronJob } from 'cron';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { FlashSalesRepository } from './flash-sales.repository';
 import {
   IFlashSale,
@@ -19,21 +20,53 @@ import {
 import { FLASH_SALES_OPTIONS_ENUM } from './flash-sales.constant';
 import { ItemsService } from '../items/items.service';
 import { IItem } from '../items/entities';
+import { USER_STATUS_ENUM } from '../users/users.constant';
+import { UsersService } from '../users/users.service';
+import { EmailService } from '../emails/emails.service';
 
 @Injectable()
 export class FlashSalesService {
   constructor(
     readonly flashSalesRepository: FlashSalesRepository,
+    readonly emailService: EmailService,
+    readonly usersService: UsersService,
+    readonly schedulerRegistry: SchedulerRegistry,
     @Inject(forwardRef(() => ItemsService))
     readonly itemsService: ItemsService,
   ) {}
 
   async createFlashSale(newFlashSale: INewFlashSale): Promise<IFlashSale> {
-    return await this.flashSalesRepository
+    const flashSale = await this.flashSalesRepository
       .create(newFlashSale)
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
+
+    const date =
+      new Date(flashSale.startTime).getTime() -
+      parseFloat(process.env.TIME_NOTIFICATION) * 60 * 1000;
+
+    const job = new CronJob(new Date(date), async () => {
+      const allUser = await this.usersService.findAllUser({
+        status: USER_STATUS_ENUM.ACTION,
+      });
+
+      const allPromise = [];
+      for (let i = 0, length = allUser.length; i < length; i++) {
+        allPromise.push(
+          this.emailService.sendMail(
+            allUser[i].email,
+            flashSale.startTime,
+            'THÔNG BÁO FLASH SALE',
+          ),
+        );
+      }
+
+      Promise.all(allPromise);
+    });
+    this.schedulerRegistry.addCronJob(`${Date.now()}`, job);
+    job.start();
+    return flashSale;
   }
 
   async findAllFlashSales(): Promise<IFlashSale[]> {

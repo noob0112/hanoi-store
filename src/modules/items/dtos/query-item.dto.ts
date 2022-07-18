@@ -11,26 +11,29 @@ export class QueryItemDto {
   @Min(0)
   minPrice?: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, minimum: 0 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   maxPrice?: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, minimum: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number;
 
-  @ApiProperty()
+  @ApiProperty({ enum: ITEM_SORT_BY_ENUM, required: false })
   @IsOptional()
   @IsEnum(ITEM_SORT_BY_ENUM)
   sortBy?: ITEM_SORT_BY_ENUM;
 
-  @ApiProperty()
+  @ApiProperty({
+    enum: [ITEM_ORDER_BY_ENUM[1], ITEM_ORDER_BY_ENUM[-1]],
+    required: false,
+  })
   @IsOptional()
   @IsEnum(ITEM_ORDER_BY_ENUM)
   order?: ITEM_ORDER_BY_ENUM;
