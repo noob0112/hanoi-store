@@ -36,6 +36,21 @@ export class FlashSalesService {
   ) {}
 
   async createFlashSale(newFlashSale: INewFlashSale): Promise<IFlashSale> {
+    const lastFlashSale = await this.flashSalesRepository.find(
+      {},
+      {},
+      { sort: { _id: -1 }, limit: 1 },
+    );
+
+    if (
+      lastFlashSale[0].endTime.getTime() >
+      new Date(newFlashSale.startTime).getTime()
+    ) {
+      throw new BadRequestException(
+        'Please input startTime more than endTime of last flash sale',
+      );
+    }
+
     const flashSale = await this.flashSalesRepository
       .create(newFlashSale)
       .catch((error) => {
@@ -47,7 +62,9 @@ export class FlashSalesService {
       parseFloat(process.env.TIME_NOTIFICATION) * 60 * 1000;
 
     if (date < new Date().getTime()) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        `Please input startTime more great than Date now 15'`,
+      );
     }
 
     const job = new CronJob(new Date(date), async () => {

@@ -93,14 +93,11 @@ export class OrdersService {
     try {
       // HAVE VOUCHER => task[user, voucher, ...listItems]
       if (order.voucherId) {
-        const [user, voucher, ...listItems] = await Promise.all(task).then(
-          (docs) => {
-            return docs;
+        const [user, voucher, ...listItems] = await Promise.all(task).catch(
+          (error) => {
+            throw new BadRequestException(error.message);
           },
         );
-        // .catch((error) => {
-        //   throw new InternalServerErrorException(error.message);
-        // });
 
         listItems.forEach(({ item, quantity }) => {
           newOrder.listItems.push({
@@ -171,19 +168,7 @@ export class OrdersService {
     }
   }
 
-  private getOrderUser(user: IUser) {
-    return {
-      userId: user._id,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      address: user.address,
-    };
-  }
-
-  //
   // Update Satatus Order
-  //
-
   async findOrderByIdAndUpdateStatus(
     orderId: string | objectId,
     updateOrderStatus: IUpdateOrderStatus,
@@ -217,6 +202,15 @@ export class OrdersService {
     return this.ordersRepository.findByIdAndUpdate(orderId, {
       $set: { status: updateOrderStatus.status },
     });
+  }
+
+  private getOrderUser(user: IUser) {
+    return {
+      userId: user._id,
+      phoneNumber: user.phoneNumber,
+      fullName: user.fullName,
+      address: user.address,
+    };
   }
 
   private getOrdrVoucher(voucher: IVoucher) {

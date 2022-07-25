@@ -95,10 +95,13 @@ export class ItemsService {
   ): Promise<IItem> {
     // Check stock
     const itemFind = await this.itemsRepository.findById(itemId);
+
+    if (!itemFind) {
+      throw new NotFoundException('Item does not exist!');
+    }
+
     if (itemFind.stock < quantity) {
-      throw new BadRequestException(
-        `Not buy quantity than (${itemFind.stock})`,
-      );
+      throw new BadRequestException(`Not buy quantity than ${itemFind.stock}`);
     }
 
     const item = await this.itemsRepository
