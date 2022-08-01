@@ -3,8 +3,8 @@ import {
   Injectable,
   // InternalServerErrorException,
 } from '@nestjs/common';
-// import { InjectConnection } from '@nestjs/mongoose';
-// import * as mongoose from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
 import { objectId } from 'src/common/types';
 
 import { OrdersRepository } from './orders.repository';
@@ -27,7 +27,8 @@ export class OrdersService {
     readonly vouchersService: VouchersService,
     readonly flashSalesService: FlashSalesService,
     readonly categoriesService: CategoriesService,
-    readonly usersService: UsersService, // @InjectConnection() private readonly connection: mongoose.Connection,
+    readonly usersService: UsersService,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
   // Create Order
@@ -40,8 +41,8 @@ export class OrdersService {
     };
 
     // Start transaction
-    // const session = await this.connection.startSession();
-    // session.startTransaction();
+    const session = await this.connection.startSession();
+    session.startTransaction();
 
     const task = [];
     const promiseUser = new Promise((resolve, reject) => {
@@ -60,7 +61,7 @@ export class OrdersService {
     if (order.voucherId) {
       const promiseVoucher = new Promise((resolve, reject) => {
         this.vouchersService
-          .findVoucherByIdAndUpdateQuantity(order.voucherId)
+          .findVoucherByIdAndUpdateQuantity(order.voucherId, session)
           .then((doc) => {
             resolve(doc);
           })
@@ -79,6 +80,7 @@ export class OrdersService {
             .findItemByIdAndUpdateStock(
               String(itemDetail.itemId),
               itemDetail.quantity,
+              session,
             )
             .then((doc) => {
               resolve({ item: doc, quantity: itemDetail.quantity });
@@ -158,13 +160,14 @@ export class OrdersService {
         newOrder.totalPrice = newOrder.originPrice;
       }
 
-      return await this.ordersRepository.create(newOrder);
-      // await session.commitTransaction();
+      const createOrder = await this.ordersRepository.create(newOrder);
+      await session.commitTransaction();
+      return createOrder;
     } catch (error) {
-      // await session.abortTransaction();
+      await session.abortTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      // session.endSession();
+      session.endSession();
     }
   }
 

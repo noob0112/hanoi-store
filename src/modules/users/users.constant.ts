@@ -5,5 +5,5 @@ export enum ROLE_ENUM {
 
 export enum USER_STATUS_ENUM {
   PENDING = 'PENDING',
-  ACTION = 'ACTION',
+  ACTION = 'ACTIVE',
 }

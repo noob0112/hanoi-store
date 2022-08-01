@@ -6,6 +6,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import * as mongoose from 'mongoose';
 
 import { CategoriesService } from '../categories/categories.service';
 import { ItemsRepository } from './items.repository';
@@ -92,6 +93,7 @@ export class ItemsService {
   async findItemByIdAndUpdateStock(
     itemId: string,
     quantity: number,
+    session: mongoose.ClientSession | null = null,
   ): Promise<IItem> {
     // Check stock
     const itemFind = await this.itemsRepository.findById(itemId);
@@ -105,9 +107,13 @@ export class ItemsService {
     }
 
     const item = await this.itemsRepository
-      .findByIdAndUpdate(itemId, {
-        $inc: { stock: -1 * quantity, countOfSelling: 1 },
-      })
+      .findByIdAndUpdate(
+        itemId,
+        {
+          $inc: { stock: -1 * quantity, countOfSelling: 1 },
+        },
+        { session: session },
+      )
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
@@ -134,6 +140,7 @@ export class ItemsService {
         String(itemFlashSale.flashSale.flashSaleId),
         item._id,
         quantity,
+        session,
       );
       // flashSale - 1
     }

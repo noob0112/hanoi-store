@@ -8,6 +8,10 @@ import {
 } from '@nestjs/common';
 import { CronJob } from 'cron';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import * as mongoose from 'mongoose';
+import * as Promise from 'bluebird';
+// import pLimit from 'p-limit';
+
 import { FlashSalesRepository } from './flash-sales.repository';
 import {
   IFlashSale,
@@ -67,20 +71,25 @@ export class FlashSalesService {
       );
     }
 
+    // const limit = pLimit(10);
+
     const job = new CronJob(new Date(date), async () => {
       const allUser = await this.usersService.findAllUser({
         status: USER_STATUS_ENUM.ACTION,
       });
 
       const allPromise = allUser.map((i) => {
+        // return limit(() =>
         return this.emailService.sendMail(
           i.email,
           flashSale.startTime,
           'THÔNG BÁO FLASH SALE',
         );
+
+        // );
       });
 
-      Promise.all(allPromise);
+      Promise.map(allPromise, (job) => job, { concurrency: 5 });
     });
     this.schedulerRegistry.addCronJob(`${Date.now()}`, job);
     job.start();
@@ -147,6 +156,7 @@ export class FlashSalesService {
     flashSaleId: string,
     itemId: string,
     quantity: number,
+    session: mongoose.ClientSession | null = null,
   ) {
     return this.flashSalesRepository.updateOne(
       {
@@ -154,7 +164,7 @@ export class FlashSalesService {
         'listItems.item.itemId': itemId,
       },
       { $inc: { 'listItems.$.stockFlashSale': -1 * quantity } },
-      { fields: { 'listItems.$': 1 }, new: true },
+      { session: session, fields: { 'listItems.$': 1 }, new: true },
     );
   }
 

@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import * as mongoose from 'mongoose';
 
 import { VouchersRepository } from './vouchers.repository';
 import {
@@ -65,11 +66,16 @@ export class VouchersService {
 
   async findVoucherByIdAndUpdateQuantity(
     voucherId: string | objectId,
+    session: mongoose.ClientSession | null = null,
   ): Promise<IVoucher> {
     const voucher = await this.vouchersRepository
-      .findByIdAndUpdate(voucherId, {
-        $inc: { quantity: -1 },
-      })
+      .findByIdAndUpdate(
+        voucherId,
+        {
+          $inc: { quantity: -1 },
+        },
+        { session: session },
+      )
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
